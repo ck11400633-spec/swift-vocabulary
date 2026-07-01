@@ -31,6 +31,7 @@ margin: 0;
 padding: 0;
 user-select: none;
 -webkit-user-select: none;
+touch-action: none; /* 禁用瀏覽器預設手勢，全權由 JS 控制 */
 }
 
 body {
@@ -66,12 +67,13 @@ align-items: center;
 background: none;
 border: none;
 color: var(--text-color);
-font-size: 15px;
+font-size: 16px;
 cursor: pointer;
-padding: 8px 12px;
+padding: 12px 14px;
 letter-spacing: 1px;
 opacity: 0.8;
 transition: opacity 0.2s;
+touch-action: manipulation;
 }
 .nav-btn:hover { opacity: 0.5; }
 
@@ -108,6 +110,7 @@ top: 50%;
 transform-style: preserve-3d;
 cursor: pointer;
 white-space: nowrap;
+padding: 15px; /* 加大觸摸盲區熱區 */
 }
 
 .word-text {
@@ -116,6 +119,7 @@ font-weight: 300;
 letter-spacing: 0.5px;
 position: relative;
 display: inline-block;
+pointer-events: none; /* 讓事件綁定在 card 上，避免子元素干擾 */
 }
 
 .wrong-dot {
@@ -156,11 +160,15 @@ text-align: center;
 font-size: 18px;
 color: var(--sub-color);
 margin-bottom: 35px;
-min-height: 25px;
+min-height: 44px;
+display: flex;
+align-items: center;
+justify-content: center;
 font-weight: 400;
 cursor: pointer;
 text-align: center;
 padding: 0 20px;
+touch-action: manipulation;
 }
 
 .action-group {
@@ -173,11 +181,12 @@ margin-bottom: 40px;
 background: none;
 border: 1px solid var(--text-color);
 color: var(--text-color);
-padding: 10px 22px;
-font-size: 14px;
+padding: 12px 26px;
+font-size: 15px;
 cursor: pointer;
-border-radius: 20px;
+border-radius: 24px;
 transition: all 0.2s;
+touch-action: manipulation;
 }
 .action-btn:hover {
 background-color: var(--text-color);
@@ -186,28 +195,29 @@ color: var(--bg-color);
 
 .switch-word-group {
 display: flex;
-gap: 40px;
+gap: 30px;
 align-items: center;
 }
 .arrow-btn {
 background: none;
 border: none;
 color: var(--sub-color);
-font-size: 15px;
+font-size: 16px;
 cursor: pointer;
-padding: 10px;
+padding: 15px;
+touch-action: manipulation;
 }
 .arrow-btn:hover { color: var(--text-color); }
 
 /* 極簡 Toast 提示 */
 .toast {
 position: absolute;
-top: 100px;
+top: 120px;
 left: 50%;
 transform: translateX(-50%);
 background: var(--toast-bg);
 color: var(--text-color);
-padding: 8px 20px;
+padding: 10px 24px;
 border-radius: 20px;
 font-size: 14px;
 z-index: 400;
@@ -225,9 +235,10 @@ background: var(--bg-color);
 z-index: 300;
 display: flex;
 flex-direction: column;
-padding: 50px 25px;
+padding: 60px 25px 40px 25px;
 overflow-y: auto;
 display: none;
+touch-action: pan-y; /* 允許彈窗內垂直捲動 */
 }
 .modal.active { display: flex; }
 
@@ -238,15 +249,17 @@ margin-bottom: 25px;
 text-align: center;
 }
 
-textarea, input[type="text"] {
+textarea, input[type="text"], select {
 width: 100%;
 background: var(--bg-color);
 color: var(--text-color);
 border: 1px solid var(--border-color);
-padding: 12px;
+padding: 14px;
 font-size: 16px;
 outline: none;
 margin-bottom: 15px;
+-webkit-appearance: none;
+touch-action: manipulation;
 }
 textarea { height: 150px; resize: none; user-select: text; -webkit-user-select: text; }
 
@@ -263,16 +276,15 @@ padding-left: 8px;
 display: flex;
 justify-content: space-between;
 align-items: center;
-padding: 12px 10px;
+padding: 14px 10px;
 border-bottom: 1px solid var(--border-color);
 }
 .list-item-row:hover { background-color: var(--border-color); }
-.list-checkbox-label { display: flex; align-items: center; gap: 10px; flex: 1; cursor: pointer; font-size: 16px; }
-.list-checkbox-label input { width: 16px; height: 16px; }
-.list-actions { display: flex; gap: 10px; }
-.sm-btn { font-size: 13px; color: var(--sub-color); background: none; border: none; cursor: pointer; }
+.list-checkbox-label { display: flex; align-items: center; gap: 12px; flex: 1; cursor: pointer; font-size: 16px; }
+.list-checkbox-label input { width: 20px; height: 20px; }
+.list-actions { display: flex; gap: 12px; }
+.sm-btn { font-size: 14px; color: var(--sub-color); background: none; border: none; cursor: pointer; padding: 6px 4px; touch-action: manipulation; }
 
-/* 內嵌單字展開清單樣式 */
 .sub-words-list {
 background: var(--toast-bg);
 padding: 5px 15px;
@@ -288,13 +300,12 @@ overflow-y: auto;
 display: flex;
 justify-content: space-between;
 align-items: center;
-padding: 8px 0;
+padding: 10px 0;
 border-bottom: 1px dashed var(--border-color);
 font-size: 14px;
 }
 .word-manage-item:last-child { border-bottom: none; }
 
-/* 線上查詢載入狀態與預覽 */
 .preview-box {
 border: 1px dashed var(--border-color);
 padding: 15px;
@@ -317,7 +328,7 @@ gap: 15px;
 flex: 1;
 max-width: 200px;
 font-size: 14px;
-padding: 4px 8px;
+padding: 6px 8px;
 margin-bottom: 0;
 border-radius: 4px;
 user-select: text;
@@ -326,8 +337,8 @@ user-select: text;
 
 .quiz-container { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; width: 100%; }
 .quiz-q { font-size: 38px; font-weight: 300; margin-bottom: 40px; text-align: center; }
-.quiz-options { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 12px; }
-.quiz-opt-btn { width: 100%; padding: 15px; background: none; border: 1px solid var(--text-color); color: var(--text-color); font-size: 15px; cursor: pointer; text-align: center; border-radius: 8px; }
+.quiz-options { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 14px; }
+.quiz-opt-btn { width: 100%; padding: 16px; background: none; border: 1px solid var(--text-color); color: var(--text-color); font-size: 16px; cursor: pointer; text-align: center; border-radius: 8px; touch-action: manipulation; }
 .quiz-opt-btn:hover { background-color: var(--text-color); color: var(--bg-color); }
 </style>
 </head>
@@ -361,7 +372,7 @@ user-select: text;
 
 <div class="switch-word-group">
 <button class="arrow-btn" onclick="switchFocusAdjacent(-1)">← 上一個</button>
-<button class="action-btn" style="border:none; padding:10px;" onclick="closeFocus()">返回海中</button>
+<button class="action-btn" style="border:none; padding:12px 20px;" onclick="closeFocus()">返回海中</button>
 <button class="arrow-btn" onclick="switchFocusAdjacent(1)">下一個 →</button>
 </div>
 </div>
@@ -385,13 +396,13 @@ user-select: text;
 <div id="combosContainer" style="max-height: 150px; overflow-y: auto;"></div>
 
 <button class="action-btn" style="width:100%; margin-top:20px; background-color: var(--text-color); color: var(--bg-color);" onclick="applySelectedLists()">確認應用選取</button>
-<button class="nav-btn" style="margin-top:10px;" onclick="closeModal('listsModal')">關閉</button>
+<button class="nav-btn" style="margin-top:10px; padding: 15px;" onclick="closeModal('listsModal')">關閉</button>
 </div>
 
 <div class="modal" id="importModal">
 <div class="modal-title">自動查詞匯入</div>
 <p style="font-size: 13px; color: var(--sub-color); margin-bottom: 10px; text-align: center;">請選擇要匯入的目的地：</p>
-<select id="importTargetSelect" style="width:100%; padding:10px; background:var(--bg-color); color:var(--text-color); border:1px solid var(--border-color); margin-bottom:15px; font-size:16px; outline:none;"></select>
+<select id="importTargetSelect"></select>
 <p style="font-size: 13px; color: var(--sub-color); margin-bottom: 10px; text-align: center;">請輸入英文或日文單字（一行一個）</p>
 <textarea id="importInput" placeholder="apple&#10;banana&#10;こもれび&#10;serendipity"></textarea>
 
@@ -403,17 +414,16 @@ user-select: text;
 <button class="action-btn" style="width:100%; margin-top:10px; background-color: var(--text-color); color: var(--bg-color);" onclick="saveImportedWordsOnline()">確認無誤，匯入海中</button>
 </div>
 
-<button class="nav-btn" style="margin-top:auto;" onclick="closeImportModal()">取消退出</button>
+<button class="nav-btn" style="margin-top:auto; padding: 15px;" onclick="closeImportModal()">取消退出</button>
 </div>
 
 <div class="modal" id="quizModal">
 <div class="modal-title">自我測驗</div>
 <div class="quiz-container" id="quizContainer"></div>
-<button class="nav-btn" style="margin-top:auto;" onclick="closeModal('quizModal')">結束測驗</button>
+<button class="nav-btn" style="margin-top:auto; padding: 15px;" onclick="closeModal('quizModal')">結束測驗</button>
 </div>
 
 <script>
-// 🌟 調整：預設包名改成「初始單字表」
 const defaultPackage = {
 currentListIds: ['list_default'], 
 lists: {
@@ -429,7 +439,6 @@ combos: {}
 
 let appData = JSON.parse(localStorage.getItem('vocab_app_data')) || defaultPackage;
 
-// 相容性修正：將使用者瀏覽器裡舊有的「核心字彙」名稱自動覆寫更新為「初始單字表」
 if (appData.lists && appData.lists['list_default'] && appData.lists['list_default'].name === '核心字彙') {
 appData.lists['list_default'].name = '初始單字表';
 }
@@ -442,6 +451,7 @@ let currentFocusIndex = -1;
 let onlineImportList = []; 
 let rotX = 0, rotY = 0;
 let isDragging = false;
+let dragMoved = false; 
 let startX, startY;
 
 function getCombinedWords() {
@@ -457,7 +467,7 @@ return combined;
 }
 
 window.onload = function() {
-const savedTheme = localStorage.getItem('theme') || 'light';
+const savedTheme = localStorage.getItem('theme') || 'dark';
 document.documentElement.setAttribute('data-theme', savedTheme);
 document.getElementById('themeBtn').innerText = savedTheme === 'dark' ? '淺色模式' : '深色模式';
 
@@ -543,7 +553,14 @@ textSpan.appendChild(dot);
 }
 
 card.appendChild(textSpan);
-card.onclick = (e) => { e.stopPropagation(); openFocus(index); };
+
+// 🌟 核心修正：改用 pointerdown/pointerup 並完全拋棄 onclick 避免模擬點擊穿透
+card.addEventListener('pointerup', (e) => {
+if (dragMoved) return; 
+e.stopPropagation();
+openFocus(index);
+});
+
 space.appendChild(card);
 });
 updateBillboards();
@@ -559,19 +576,46 @@ card.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateY(${-rotY}deg)
 
 function init3DControl() {
 const container = document.getElementById('stageContainer');
-const dragStart = (x, y) => { isDragging = true; startX = x; startY = y; };
+
+const dragStart = (x, y) => { 
+isDragging = true; 
+dragMoved = false; 
+startX = x; 
+startY = y; 
+};
+
 const dragMove = (x, y) => {
 if (!isDragging) return;
-rotY += (x - startX) * 0.25; rotX -= (y - startY) * 0.25; startX = x; startY = y;
+const dx = x - startX;
+const dy = y - startY;
+
+if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+dragMoved = true;
+}
+rotY += dx * 0.25; 
+rotX -= dy * 0.25; 
+startX = x; 
+startY = y;
 document.getElementById('space3d').style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
 updateBillboards();
 };
-container.onmousedown = (e) => dragStart(e.clientX, e.clientY);
-window.onmouseup = () => isDragging = false;
-window.onmousemove = (e) => dragMove(e.clientX, e.clientY);
-container.ontouchstart = (e) => dragStart(e.touches[0].clientX, e.touches[0].clientY);
-window.ontouchend = () => isDragging = false;
-window.ontouchmove = (e) => dragMove(e.touches[0].clientX, e.touches[0].clientY);
+
+const dragEnd = () => {
+// 使用微小延遲重置，確保單字卡的事件攔截能完美同步
+setTimeout(() => { 
+isDragging = false; 
+}, 10);
+};
+
+// 使用 Pointer Events 同時完美兼容滑鼠與手機觸控，並防止原生穿透
+container.addEventListener('pointerdown', (e) => {
+dragStart(e.clientX, e.clientY);
+});
+window.addEventListener('pointermove', (e) => {
+dragMove(e.clientX, e.clientY);
+});
+window.addEventListener('pointerup', dragEnd);
+window.addEventListener('pointercancel', dragEnd);
 }
 
 function animate() {
@@ -610,6 +654,9 @@ document.getElementById('focusTrans').innerText = '點擊顯示翻譯';
 
 function closeFocus() {
 document.getElementById('focusOverlay').classList.remove('active');
+// 離開聚焦時強制清除剩餘的滑動狀態
+dragMoved = false;
+isDragging = false;
 render3DSpace();
 }
 
@@ -667,7 +714,6 @@ const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(word
 const response = await fetch(url);
 const data = await response.json();
 if(data && data.responseData) {
-// 清除回傳翻譯後方結尾出現的「。」或「.」
 translation = data.responseData.translatedText.trim().replace(/[.。]+$/, '');
 }
 } catch (e) {
@@ -676,7 +722,6 @@ translation = '網路查詢失敗';
 
 onlineImportList.push({ word, trans: [translation] });
 
-// 🌟 調整：預設中文顯示區改為可自由輸入編輯的 input 元件
 const itemDiv = document.createElement('div');
 itemDiv.className = 'preview-item';
 itemDiv.innerHTML = `
@@ -696,7 +741,6 @@ const currentList = appData.lists[targetListId];
 if(!currentList) return alert('找不到目標單字包');
 
 onlineImportList.forEach((item, index) => {
-// 🌟 核心增強：儲存前動態抓取使用者編輯後的最新中文文字
 const editedInput = document.getElementById(`inlineEdit_${index}`);
 const finalTranslation = editedInput ? editedInput.value.trim() : item.trans[0];
 
@@ -744,7 +788,6 @@ btn.disabled = false;
 function renderListsManager() {
 const container = document.getElementById('listsContainer');
 container.innerHTML = '';
-// 🌟 特點：這理會遍歷包含「初始單字表」在內的所有單字包，全部條列管理
 Object.keys(appData.lists).forEach(id => {
 const list = appData.lists[id];
 const row = document.createElement('div');
@@ -776,7 +819,7 @@ const wordItem = document.createElement('div');
 wordItem.className = 'word-manage-item';
 wordItem.innerHTML = `
 <span><strong>${w.word}</strong> <span style="color:var(--sub-color); font-size:13px;">(${w.trans.join(', ')})</span></span>
-<button class="sm-btn" style="color:#FF453A; padding: 2px 6px;" onclick="deleteWordFromList('${id}', ${wIndex}, event)">✕</button>
+<button class="sm-btn" style="color:#FF453A; padding: 6px 10px;" onclick="deleteWordFromList('${id}', ${wIndex}, event)">✕</button>
 `;
 subWordsListDiv.appendChild(wordItem);
 });
