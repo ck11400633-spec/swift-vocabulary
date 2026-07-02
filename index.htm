@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Minimalist Vocab</title>
+    <title>Minimalist Vocab - Cylinder Mode</title>
     <style>
         :root {
             --bg-color: #ffffff;
@@ -68,7 +68,9 @@
             transition: opacity 0.2s;
             touch-action: manipulation;
         }
-        .nav-btn:hover { opacity: 0.5; }
+        .nav-btn:hover {
+            opacity: 0.5;
+        }
         #currentListNameBtn {
             font-weight: 500;
             border-bottom: 1px dashed var(--text-color);
@@ -77,20 +79,21 @@
         .stage-container {
             width: 100%;
             height: 100%;
-            perspective: 800px;
+            perspective: 1200px; /* 增加透視感 */
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: grab;
         }
-        .stage-container:active { cursor: grabbing; }
+        .stage-container:active {
+            cursor: grabbing;
+        }
         .space3d {
             width: 100%;
             height: 100%;
             position: relative;
             transform-style: preserve-3d;
-            /* 讓縮放與旋轉的核心集中在中心 */
-            transform-origin: center center; 
+            transform-origin: center center;
         }
         .word-card {
             position: absolute;
@@ -102,7 +105,7 @@
             padding: 15px;
         }
         .word-text {
-            font-size: 22px;
+            font-size: 24px; /* 加大字體 */
             font-weight: 300;
             letter-spacing: 0.5px;
             position: relative;
@@ -131,10 +134,19 @@
             pointer-events: none;
             transition: opacity 0.3s ease;
         }
-        .focus-overlay.active { opacity: 1; pointer-events: auto; }
-        .focus-word { font-size: 44px; font-weight: 300; margin-bottom: 15px; letter-spacing: 1px; text-align: center; }
+        .focus-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .focus-word {
+            font-size: 48px;
+            font-weight: 300;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            text-align: center;
+        }
         .focus-trans {
-            font-size: 18px;
+            font-size: 20px;
             color: var(--sub-color);
             margin-bottom: 35px;
             min-height: 44px;
@@ -147,7 +159,11 @@
             padding: 0 20px;
             touch-action: manipulation;
         }
-        .action-group { display: flex; gap: 15px; margin-bottom: 40px; }
+        .action-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
         .action-btn {
             background: none;
             border: 1px solid var(--text-color);
@@ -159,10 +175,27 @@
             transition: all 0.2s;
             touch-action: manipulation;
         }
-        .action-btn:hover { background-color: var(--text-color); color: var(--bg-color); }
-        .switch-word-group { display: flex; gap: 30px; align-items: center; }
-        .arrow-btn { background: none; border: none; color: var(--sub-color); font-size: 16px; cursor: pointer; padding: 15px; touch-action: manipulation; }
-        .arrow-btn:hover { color: var(--text-color); }
+        .action-btn:hover {
+            background-color: var(--text-color);
+            color: var(--bg-color);
+        }
+        .switch-word-group {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        .arrow-btn {
+            background: none;
+            border: none;
+            color: var(--sub-color);
+            font-size: 16px;
+            cursor: pointer;
+            padding: 15px;
+            touch-action: manipulation;
+        }
+        .arrow-btn:hover {
+            color: var(--text-color);
+        }
         .toast {
             position: absolute;
             top: 120px;
@@ -178,7 +211,9 @@
             pointer-events: none;
             transition: opacity 0.3s;
         }
-        .toast.show { opacity: 1; }
+        .toast.show {
+            opacity: 1;
+        }
         .modal {
             position: absolute;
             top: 0;
@@ -194,8 +229,15 @@
             display: none;
             touch-action: pan-y;
         }
-        .modal.active { display: flex; }
-        .modal-title { font-size: 24px; font-weight: 300; margin-bottom: 25px; text-align: center; }
+        .modal.active {
+            display: flex;
+        }
+        .modal-title {
+            font-size: 24px;
+            font-weight: 300;
+            margin-bottom: 25px;
+            text-align: center;
+        }
         textarea, input[type="text"], select {
             width: 100%;
             background: var(--bg-color);
@@ -208,26 +250,120 @@
             -webkit-appearance: none;
             touch-action: manipulation;
         }
-        textarea { height: 150px; resize: none; user-select: text; -webkit-user-select: text; }
-        .section-subtitle { font-size: 16px; font-weight: 500; margin-top: 15px; margin-bottom: 10px; border-left: 3px solid var(--text-color); padding-left: 8px; }
-        .list-item-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 10px; border-bottom: 1px solid var(--border-color); }
-        .list-item-row:hover { background-color: var(--border-color); }
-        .list-checkbox-label { display: flex; align-items: center; gap: 12px; flex: 1; cursor: pointer; font-size: 16px; }
-        .list-checkbox-label input { width: 20px; height: 20px; }
-        .list-actions { display: flex; gap: 12px; }
-        .sm-btn { font-size: 14px; color: var(--sub-color); background: none; border: none; cursor: pointer; padding: 6px 4px; touch-action: manipulation; }
-        .sub-words-list { background: var(--toast-bg); padding: 5px 15px; border-radius: 6px; margin: 5px 10px 15px 10px; display: none; flex-direction: column; max-height: 250px; overflow-y: auto; }
-        .sub-words-list.active { display: flex; }
-        .word-manage-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed var(--border-color); font-size: 14px; }
-        .word-manage-item:last-child { border-bottom: none; }
-        .preview-box { border: 1px dashed var(--border-color); padding: 15px; border-radius: 8px; max-height: 200px; overflow-y: auto; margin-bottom: 15px; font-size: 14px; }
-        .preview-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; gap: 15px; }
-        .preview-edit-input { flex: 1; max-width: 200px; font-size: 14px; padding: 6px 8px; margin-bottom: 0; border-radius: 4px; user-select: text; -webkit-user-select: text; }
-        .quiz-container { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; width: 100%; }
-        .quiz-q { font-size: 38px; font-weight: 300; margin-bottom: 40px; text-align: center; }
-        .quiz-options { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 14px; }
-        .quiz-opt-btn { width: 100%; padding: 16px; background: none; border: 1px solid var(--text-color); color: var(--text-color); font-size: 16px; cursor: pointer; text-align: center; border-radius: 8px; touch-action: manipulation; }
-        .quiz-opt-btn:hover { background-color: var(--text-color); color: var(--bg-color); }
+        textarea {
+            height: 150px;
+            resize: none;
+            user-select: text;
+            -webkit-user-select: text;
+        }
+        .section-subtitle {
+            font-size: 16px;
+            font-weight: 500;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--text-color);
+            padding-left: 8px;
+        }
+        .list-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .list-item-row:hover {
+            background-color: var(--border-color);
+        }
+        .list-checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .list-checkbox-label input {
+            width: 20px;
+            height: 20px;
+        }
+        .list-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .sm-btn {
+            font-size: 14px;
+            color: var(--sub-color);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px 4px;
+            touch-action: manipulation;
+        }
+        .preview-box {
+            border: 1px dashed var(--border-color);
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .preview-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 4px;
+            gap: 15px;
+        }
+        .preview-edit-input {
+            flex: 1;
+            max-width: 200px;
+            font-size: 14px;
+            padding: 6px 8px;
+            margin-bottom: 0;
+            border-radius: 4px;
+            user-select: text;
+            -webkit-user-select: text;
+        }
+        .quiz-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            width: 100%;
+        }
+        .quiz-q {
+            font-size: 38px;
+            font-weight: 300;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        .quiz-options {
+            width: 100%;
+            max-width: 360px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .quiz-opt-btn {
+            width: 100%;
+            padding: 16px;
+            background: none;
+            border: 1px solid var(--text-color);
+            color: var(--text-color);
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+            border-radius: 8px;
+            touch-action: manipulation;
+        }
+        .quiz-opt-btn:hover {
+            background-color: var(--text-color);
+            color: var(--bg-color);
+        }
     </style>
 </head>
 <body>
@@ -242,9 +378,11 @@
             <button class="nav-btn" id="themeBtn" onclick="toggleTheme()">深色模式</button>
         </div>
     </div>
+    
     <div class="stage-container" id="stageContainer">
         <div class="space3d" id="space3d"></div>
     </div>
+
     <div class="focus-overlay" id="focusOverlay">
         <div class="focus-word" id="focusWord">Word</div>
         <div class="focus-trans" id="focusTrans" onclick="revealTranslation()">點擊顯示翻譯</div>
@@ -254,27 +392,22 @@
         </div>
         <div class="switch-word-group">
             <button class="arrow-btn" onclick="switchFocusAdjacent(-1)">← 上一個</button>
-            <button class="action-btn" style="border:none; padding:12px 20px;" onclick="closeFocus()">返回海中</button>
+            <button class="action-btn" style="border:none; padding:12px 20px;" onclick="closeFocus()">返回筒中</button>
             <button class="arrow-btn" onclick="switchFocusAdjacent(1)">下一個 →</button>
         </div>
     </div>
+
     <div class="modal" id="listsModal">
-        <div class="modal-title">我的單字表與組合</div>
+        <div class="modal-title">我的單字包</div>
         <div style="display:flex; gap:10px; margin-bottom:10px;">
             <input type="text" id="newListNameInput" placeholder="輸入新單字表名稱..." style="margin-bottom:0;">
             <button class="action-btn" onclick="createNewList()">創立</button>
         </div>
-        <div class="section-subtitle">基礎單字包（可多選）</div>
-        <div id="listsContainer" style="max-height: 350px; overflow-y: auto;"></div>
-        <div style="display: flex; gap: 10px; margin-top: 15px; align-items: center;">
-            <input type="text" id="newComboNameInput" placeholder="將目前勾選存為新組合名稱..." style="margin-bottom:0;">
-            <button class="action-btn" onclick="saveCurrentCombo()">儲存此組合</button>
-        </div>
-        <div class="section-subtitle">已存組合包</div>
-        <div id="combosContainer" style="max-height: 150px; overflow-y: auto;"></div>
-        <button class="action-btn" style="width:100%; margin-top:20px; background-color: var(--text-color); color: var(--bg-color);" onclick="applySelectedLists()">確認應用選取</button>
+        <div id="listsContainer" style="max-height: 400px; overflow-y: auto;"></div>
+        <button class="action-btn" style="width:100%; margin-top:20px; background-color: var(--text-color); color: var(--bg-color);" onclick="closeModal('listsModal')">確認應用選取</button>
         <button class="nav-btn" style="margin-top:10px; padding: 15px;" onclick="closeModal('listsModal')">關閉</button>
     </div>
+
     <div class="modal" id="importModal">
         <div class="modal-title">自動查詞匯入</div>
         <p style="font-size: 13px; color: var(--sub-color); margin-bottom: 10px; text-align: center;">請選擇要匯入的目的地：</p>
@@ -282,227 +415,514 @@
         <p style="font-size: 13px; color: var(--sub-color); margin-bottom: 10px; text-align: center;">請輸入單字（一行一個）。支援直接帶有翻譯，例如：apple 蘋果</p>
         <textarea id="importInput" placeholder="apple 蘋果&#10;banana 香蕉&#10;serendipity 不期而遇的美好&#10;ephemeral"></textarea>
         <button id="startQueryBtn" class="action-btn" style="width:100%; margin-bottom:20px;" onclick="fetchTranslationsOnline()">開始自動查詢與解析</button>
+        
         <div id="queryPreviewSection" style="display:none; flex: 1; display: flex; flex-direction: column;">
             <p style="margin-bottom:10px; font-weight: 500;">字典查詢預覽（可在下方框內直接修改翻譯）：</p>
             <div class="preview-box" id="previewBox"></div>
-            <button class="action-btn" style="width:100%; margin-top:10px; background-color: var(--text-color); color: var(--bg-color);" onclick="saveImportedWordsOnline()">確認無誤，匯入海中</button>
+            <button class="action-btn" style="width:100%; margin-top:10px; background-color: var(--text-color); color: var(--bg-color);" onclick="saveImportedWordsOnline()">確認無誤，匯入筒中</button>
         </div>
         <button class="nav-btn" style="margin-top:auto; padding: 15px;" onclick="closeImportModal()">取消退出</button>
     </div>
+
     <div class="modal" id="quizModal">
         <div class="modal-title">自我測驗</div>
         <div class="quiz-container" id="quizContainer"></div>
         <button class="nav-btn" style="margin-top:auto; padding: 15px;" onclick="closeModal('quizModal')">結束測驗</button>
     </div>
+
     <script>
         const defaultPackage = {
-            currentListIds: ['list_default'], 
+            currentListIds: ['list_default'],
             lists: {
-                'list_default': { 
-                    name: '初始單字表', 
+                'list_default': {
+                    name: '初始單字表',
                     words: [
-                        { id: 1, word: 'serendipity', trans: ['不期而遇的美好'], wrongCount: 2, lastReviewed: Date.now() - 900000000 }, 
-                        { id: 2, word: 'こもれび', trans: ['從樹葉縫隙漏下來的陽光'], wrongCount: 0, lastReviewed: Date.now() }, 
-                        { id: 3, word: 'ephemeral', trans: ['轉瞬即逝的'], wrongCount: 4, lastReviewed: Date.now() - 500000000 }, 
-                        { id: 4, word: 'しんりんよく', trans: ['森林浴'], wrongCount: 1, lastReviewed: Date.now() }
+                        { id: 1, word: 'serendipity', trans: ['不期而遇的美好'], wrongCount: 2, lastReviewed: Date.now() - 900000000 },
+                        { id: 2, word: 'こもれび', trans: ['從樹葉縫隙漏下來的陽光'], wrongCount: 0, lastReviewed: Date.now() },
+                        { id: 3, word: 'ephemeral', trans: ['轉瞬即逝的'], wrongCount: 4, lastReviewed: Date.now() - 500000000 },
+                        { id: 4, word: 'しんりんよく', trans: ['森林浴'], wrongCount: 1, lastReviewed: Date.now() },
+                        { id: 5, word: 'wanderlust', trans: ['漫遊癖'], wrongCount: 0, lastReviewed: Date.now() },
+                        { id: 6, word: 'nefarious', trans: ['邪惡的'], wrongCount: 3, lastReviewed: Date.now() - 600000000 },
+                        { id: 7, word: 'sonder', trans: ['意識到每個人都有其獨特的生活'], wrongCount: 1, lastReviewed: Date.now() }
                     ]
-                } 
-            }, 
-            combos: {} 
+                }
+            }
         };
-        
-        let appData = JSON.parse(localStorage.getItem('vocab_app_data')) || defaultPackage;
-        if (appData.lists && appData.lists['list_default'] && appData.lists['list_default'].name === '核心字彙') {
-            appData.lists['list_default'].name = '初始單字表'; 
-        }
+
+        let appData = JSON.parse(localStorage.getItem('vocab_cylinder_data')) || defaultPackage;
         if (!Array.isArray(appData.currentListIds)) {
-            appData.currentListIds = appData.currentListId ? [appData.currentListId] : ['list_default']; 
+            appData.currentListIds = ['list_default'];
         }
-        if (!appData.combos) appData.combos = {};
-        
+
         let currentFocusIndex = -1;
         let onlineImportList = [];
         let rotX = 0, rotY = 0;
-        let translateZ = -300; // 控制縮放的深度變數，預設往後退 300px
+        let translateZ = -600; // 筒狀半徑，預設往後退 600px 以便看到全貌
         let isDragging = false;
         let dragMoved = false;
         let startX, startY;
-        let initialPinchDist = null; // 用於手機雙指縮放
+        let initialPinchDist = null;
 
         function getCombinedWords() {
-            let combined = []; 
+            let combined = [];
             appData.currentListIds.forEach(id => {
                 if (appData.lists[id]) {
-                    appData.lists[id].words.forEach(w => { combined.push({ ...w, originListId: id }); }); 
-                } 
-            }); 
-            return combined; 
+                    appData.lists[id].words.forEach(w => {
+                        combined.push({ ...w, originListId: id });
+                    });
+                }
+            });
+            return combined;
         }
-        
+
         window.onload = function() {
-            const savedTheme = localStorage.getItem('theme') || 'dark'; 
-            document.documentElement.setAttribute('data-theme', savedTheme); 
-            document.getElementById('themeBtn').innerText = savedTheme === 'dark' ? '淺色模式' : '深色模式'; 
-            updateNavBarTitle(); 
-            render3DSpace(); 
-            init3DControl(); 
-            animate(); 
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.getElementById('themeBtn').innerText = savedTheme === 'dark' ? '淺色模式' : '深色模式';
+            updateNavBarTitle();
+            renderCylinderSpace();
+            init3DControl();
+            updateSpaceTransform();
         };
-        
+
         function showToast(msg) {
-            const toast = document.getElementById('toastNotice'); 
-            toast.innerText = msg; 
-            toast.classList.add('show'); 
-            setTimeout(() => toast.classList.remove('show'), 1200); 
+            const toast = document.getElementById('toastNotice');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 1200);
         }
-        
-        function saveToStorage() { localStorage.setItem('vocab_app_data', JSON.stringify(appData)); }
-        
+
+        function saveToStorage() {
+            localStorage.setItem('vocab_cylinder_data', JSON.stringify(appData));
+        }
+
         function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme'); 
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark'; 
-            document.documentElement.setAttribute('data-theme', newTheme); 
-            localStorage.setItem('theme', newTheme); 
-            document.getElementById('themeBtn').innerText = newTheme === 'dark' ? '淺色模式' : '深色模式'; 
-            render3DSpace(); 
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            document.getElementById('themeBtn').innerText = newTheme === 'dark' ? '淺色模式' : '深色模式';
         }
-        
+
         function updateNavBarTitle() {
             if (appData.currentListIds.length === 1) {
-                const id = appData.currentListIds[0]; 
-                document.getElementById('currentListNameBtn').innerText = appData.lists[id] ? appData.lists[id].name : '選擇單字表'; 
+                const id = appData.currentListIds[0];
+                document.getElementById('currentListNameBtn').innerText = appData.lists[id] ? appData.lists[id].name : '選擇單字表';
             } else {
-                document.getElementById('currentListNameBtn').innerText = `已選 ${appData.currentListIds.length} 個單字包`; 
-            } 
+                document.getElementById('currentListNameBtn').innerText = `已選 ${appData.currentListIds.length} 個單字包`;
+            }
         }
-        
-        // 核心修改 1：改造成圓筒狀環繞（Cylinder Layout）
-        function render3DSpace() {
-            const space = document.getElementById('space3d'); 
-            space.innerHTML = ''; 
-            const wordsArr = getCombinedWords(); 
+
+        // 改造成圓筒狀環繞（Cylinder Layout）
+        function renderCylinderSpace() {
+            const space = document.getElementById('space3d');
+            space.innerHTML = '';
+            const wordsArr = getCombinedWords();
             if (wordsArr.length === 0) {
-                space.innerHTML = `<div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:var(--sub-color); font-size:14px; text-align:center; width:80%;">目前無選取單字包或包內空空的，請點選「匯入」或更改單字包勾選</div>`; 
-                return; 
-            } 
-            
-            const isMobilePortrait = window.innerWidth < window.innerHeight; 
-            // 圓筒半徑：人在中間，單字在外圈圍繞。半徑大一點，空間感比較好
-            const radius = isMobilePortrait ? window.innerWidth * 0.7 : 450; 
-            
-            // 計算縱向分層與每層單字數
+                space.innerHTML = `<div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:var(--sub-color); font-size:14px; text-align:center; width:80%;">目前無選取單字包或包內空空的，請點選「匯入」或更改單字包勾選</div>`;
+                return;
+            }
+
             const totalWords = wordsArr.length;
             // 根據單字量自動決定分幾層高（每層放 8~12 個效果最好）
-            const wordsPerLayer = Math.min(10, totalWords);
+            const wordsPerLayer = totalWords > 12 ? 10 : totalWords;
             const heightStep = 110; // 每層的縱向間距
-            
+            const radius = 600; // 筒狀半徑，人在中間，單字在外圈圍繞
+
             wordsArr.forEach((item, index) => {
-                const card = document.createElement('div'); 
-                card.className = 'word-card'; 
-                card.setAttribute('data-index', index); 
-                
+                const card = document.createElement('div');
+                card.className = 'word-card';
+                card.setAttribute('data-index', index);
+
                 // 計算筒狀座標
                 const layer = Math.floor(index / wordsPerLayer); // 第幾層
                 const totalLayers = Math.ceil(totalWords / wordsPerLayer);
                 const layerIndex = index % wordsPerLayer; // 當前層的第幾個
-                
+
                 // 角度（水平環繞）
                 const theta = (layerIndex / wordsPerLayer) * 2 * Math.PI;
-                
-                // 3D 空間座標位置
+
+                // 3D 空間座標位置 (筒狀)
                 const x = radius * Math.sin(theta);
                 const z = radius * Math.cos(theta);
+
                 // 縱向居中排列
-                const y = (layer - (totalLayers - 1) / 2) * heightStep; 
+                const y = (layer - (totalLayers - 1) / 2) * heightStep;
+
+                // 根據複習時間設定大小
+                const daysUnreviewed = (Date.now() - item.lastReviewed) / (1000 * 60 * 60 * 24);
+                let sizeScale = daysUnreviewed > 3 ? 1.35 : 1;
                 
-                const daysUnreviewed = (Date.now() - item.lastReviewed) / (1000 * 60 * 60 * 24); 
-                let sizeScale = daysUnreviewed > 3 ? 1.35 : 1; 
-                
-                card.dataset.x = x; 
-                card.dataset.y = y; 
-                card.dataset.z = z; 
-                card.dataset.scale = sizeScale; 
-                
-                // 初始位置設定
-                card.style.transform = `translate3d(${x}px, ${y}px, ${z}px) scale(${sizeScale})`; 
-                
-                const textSpan = document.createElement('span'); 
-                textSpan.className = 'word-text'; 
-                if (isMobilePortrait && item.word.length > 10) textSpan.style.fontSize = '18px'; 
-                textSpan.innerText = item.word; 
-                
+                card.dataset.x = x;
+                card.dataset.y = y;
+                card.dataset.z = z;
+                card.dataset.scale = sizeScale;
+
+                const textSpan = document.createElement('span');
+                textSpan.className = 'word-text';
+                textSpan.innerText = item.word;
+
                 if(item.wrongCount > 0) {
-                    const dot = document.createElement('div'); 
-                    dot.className = 'wrong-dot'; 
-                    dot.style.display = 'block'; 
-                    const dotSize = Math.min(5 + item.wrongCount * 1.5, 13); 
-                    dot.style.width = dotSize + 'px'; 
-                    dot.style.height = dotSize + 'px'; 
-                    dot.style.top = `-${dotSize/2}px`; 
-                    dot.style.right = `-${dotSize}px`; 
-                    textSpan.appendChild(dot); 
-                } 
-                card.appendChild(textSpan); 
-                
+                    const dot = document.createElement('div');
+                    dot.className = 'wrong-dot';
+                    dot.style.display = 'block';
+                    const dotSize = Math.min(5 + item.wrongCount * 1.5, 13);
+                    dot.style.width = dotSize + 'px';
+                    dot.style.height = dotSize + 'px';
+                    dot.style.top = `-${dotSize/2}px`;
+                    dot.style.right = `-${dotSize}px`;
+                    textSpan.appendChild(dot);
+                }
+                card.appendChild(textSpan);
                 card.addEventListener('pointerup', (e) => {
-                    if (dragMoved) return; 
-                    e.stopPropagation(); 
-                    openFocus(index); 
-                }); 
-                space.appendChild(card); 
-            }); 
-            updateBillboards(); 
+                    if (dragMoved) return;
+                    e.stopPropagation();
+                    openFocus(index);
+                });
+                space.appendChild(card);
+            });
+            updateBillboards();
         }
-        
+
+        //Billboard Effect: 讓單字不論怎麼轉都面向鏡頭
         function updateBillboards() {
-            const cards = document.querySelectorAll('.word-card'); 
+            const cards = document.querySelectorAll('.word-card');
             cards.forEach(card => {
-                const x = card.dataset.x; 
-                const y = card.dataset.y; 
-                const z = card.dataset.z; 
-                const scale = card.dataset.scale; 
-                // 這裡加入 rotateY 和 rotateX 修正，讓單字不論怎麼轉都面向鏡頭 (Billboard Effect)
-                card.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateY(${-rotY}deg) rotateX(${-rotX}deg) scale(${scale})`; 
-            }); 
+                const x = card.dataset.x;
+                const y = card.dataset.y;
+                const z = card.dataset.z;
+                const scale = card.dataset.scale;
+                card.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateY(${-rotY}deg) rotateX(${-rotX}deg) scale(${scale})`;
+            });
         }
-        
-        // 核心修改 2：舞台加入 3D 的 translateZ（前後縮放移動）
+
         function updateSpaceTransform() {
             document.getElementById('space3d').style.transform = `translateZ(${translateZ}px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
         }
-        
+
         function init3DControl() {
-            const container = document.getElementById('stageContainer'); 
+            const container = document.getElementById('stageContainer');
             
-            const dragStart = (x, y) => {
-                isDragging = true; 
-                dragMoved = false; 
-                startX = x; 
-                startY = y; 
-            };
-            
-            const dragMove = (x, y) => {
-                if (!isDragging) return; 
-                const dx = x - startX; 
-                const dy = y - startY; 
-                if (Math.abs(dx) > 4 || Math.abs(dy) > 4) { dragMoved = true; } 
-                rotY += dx * 0.25; 
-                rotX -= dy * 0.25; 
-                
-                // 限制上下視角，避免翻轉過頭頭暈
-                rotX = Math.max(-45, Math.min(45, rotX));
-                
-                startX = x; 
-                startY = y; 
+            // 滑鼠/手指 拖曳旋轉
+            container.addEventListener('pointerdown', (e) => {
+                isDragging = true;
+                dragMoved = false;
+                startX = e.clientX;
+                startY = e.clientY;
+                container.setPointerCapture(e.pointerId);
+            });
+
+            container.addEventListener('pointermove', (e) => {
+                if (!isDragging) return;
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+                    dragMoved = true;
+                }
+                rotY += dx * 0.25;
+                rotX -= dy * 0.25;
+                rotX = Math.max(-45, Math.min(45, rotX)); // 限制上下視角
+                startX = e.clientX;
+                startY = e.clientY;
                 updateSpaceTransform();
-                updateBillboards(); 
-            };
-            
-            const dragEnd = () => { setTimeout(() => { isDragging = false; }, 10); }; 
-            
-            // 電腦端滑鼠滾輪縮放
+                updateBillboards();
+            });
+
+            container.addEventListener('pointerup', (e) => {
+                isDragging = false;
+                container.releasePointerCapture(e.pointerId);
+            });
+
+            // 電腦端滑鼠滾輪前後移動
             window.addEventListener('wheel', (e) => {
-                // 排除彈窗內捲動干擾
                 if (document.querySelector('.modal.active')) return;
+                translateZ -= e.deltaY * 0.5;
+                translateZ = Math.max(-1200, Math.min(100, translateZ)); // 限制縮放範圍
+                updateSpaceTransform();
+            }, { passive: true });
+
+            // 手機端雙指縮放前後移動
+            container.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 2) {
+                    initialPinchDist = Math.hypot(
+                        e.touches[0].pageX - e.touches[1].pageX,
+                        e.touches[0].pageY - e.touches[1].pageY
+                    );
+                }
+            }, { passive: true });
+
+            container.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 2 && initialPinchDist) {
+                    const currentDist = Math.hypot(
+                        e.touches[0].pageX - e.touches[1].pageX,
+                        e.touches[0].pageY - e.touches[1].pageY
+                    );
+                    const delta = currentDist - initialPinchDist;
+                    translateZ += delta * 1.5;
+                    translateZ = Math.max(-1200, Math.min(100, translateZ));
+                    initialPinchDist = currentDist;
+                    updateSpaceTransform();
+                }
+            }, { passive: true });
+
+            container.addEventListener('touchend', (e) => {
+                if (e.touches.length < 2) {
+                    initialPinchDist = null;
+                }
+            });
+        }
+
+        // 單字 Focus 檢視邏輯
+        function openFocus(index) {
+            const wordsArr = getCombinedWords();
+            if(!wordsArr[index]) return;
+            currentFocusIndex = index;
+            const item = wordsArr[index];
+            document.getElementById('focusWord').innerText = item.word;
+            document.getElementById('focusTrans').innerText = '點擊顯示翻譯';
+            document.getElementById('focusOverlay').classList.add('active');
+        }
+
+        function revealTranslation() {
+            const wordsArr = getCombinedWords();
+            const item = wordsArr[currentFocusIndex];
+            if(item) {
+                document.getElementById('focusTrans').innerText = item.trans.join(', ');
+            }
+        }
+
+        function closeFocus() {
+            document.getElementById('focusOverlay').classList.remove('active');
+            renderCylinderSpace(); // 重新渲染以更新錯誤點點
+        }
+
+        function switchFocusAdjacent(dir) {
+            const wordsArr = getCombinedWords();
+            if (wordsArr.length === 0) return;
+            let newIndex = currentFocusIndex + dir;
+            if (newIndex < 0) newIndex = wordsArr.length - 1;
+            if (newIndex >= wordsArr.length) newIndex = 0;
+            openFocus(newIndex);
+        }
+
+        function markLearned(isLearned) {
+            const wordsArr = getCombinedWords();
+            const focusedWord = wordsArr[currentFocusIndex];
+            if (!focusedWord) return;
+
+            const targetList = appData.lists[focusedWord.originListId];
+            if (targetList) {
+                const wordInData = targetList.words.find(w => w.id === focusedWord.id);
+                if (wordInData) {
+                    if (isLearned) {
+                        wordInData.wrongCount = Math.max(0, wordInData.wrongCount - 1);
+                        showToast('記住了！錯誤標記減少');
+                    } else {
+                        wordInData.wrongCount += 1;
+                        showToast('已記錄，加強複習點點');
+                    }
+                    wordInData.lastReviewed = Date.now();
+                    saveToStorage();
+                }
+            }
+            switchFocusAdjacent(1);
+        }
+
+        // 彈窗管理
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+            if (id === 'listsModal') renderListsManager();
+            if (id === 'importModal') prepareImportTargetSelect();
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+            renderCylinderSpace();
+        }
+
+        // 單字包組合管理
+        function renderListsManager() {
+            const container = document.getElementById('listsContainer');
+            container.innerHTML = '';
+            Object.keys(appData.lists).forEach(id => {
+                const list = appData.lists[id];
+                const checked = appData.currentListIds.includes(id) ? 'checked' : '';
                 
-                translateZ -= e.deltaY * 0.
+                const row = document.createElement('div');
+                row.className = 'list-item-row';
+                row.innerHTML = `
+                    <label class="list-checkbox-label">
+                        <input type="checkbox" value="${id}" ${checked} onchange="toggleListSelection('${id}')">
+                        <span>${list.name} (${list.words.length})</span>
+                    </label>
+                    <div class="list-actions">
+                        <button class="sm-btn" onclick="deleteList('${id}')">刪除</button>
+                    </div>
+                `;
+                container.innerHTML += row.outerHTML;
+            });
+        }
+
+        function toggleListSelection(id) {
+            const idx = appData.currentListIds.indexOf(id);
+            if (idx > -1) {
+                if (appData.currentListIds.length > 1) appData.currentListIds.splice(idx, 1);
+                else showToast('請至少保留一個單字表');
+            } else {
+                appData.currentListIds.push(id);
+            }
+            saveToStorage();
+            updateNavBarTitle();
+        }
+
+        function createNewList() {
+            const nameInput = document.getElementById('newListNameInput');
+            const name = nameInput.value.trim();
+            if (!name) return;
+            const id = 'list_' + Date.now();
+            appData.lists[id] = { name: name, words: [] };
+            nameInput.value = '';
+            saveToStorage();
+            renderListsManager();
+        }
+
+        function deleteList(id) {
+            if (Object.keys(appData.lists).length <= 1) {
+                showToast('無法刪除唯一的單字表');
+                return;
+            }
+            delete appData.lists[id];
+            appData.currentListIds = appData.currentListIds.filter(cid => cid !== id);
+            if (appData.currentListIds.length === 0) appData.currentListIds = [Object.keys(appData.lists)[0]];
+            saveToStorage();
+            updateNavBarTitle();
+            renderListsManager();
+        }
+
+        // 模擬字典查詞與匯入
+        function prepareImportTargetSelect() {
+            const select = document.getElementById('importTargetSelect');
+            select.innerHTML = '';
+            Object.keys(appData.lists).forEach(id => {
+                select.innerHTML += `<option value="${id}">${appData.lists[id].name}</option>`;
+            });
+        }
+
+        function fetchTranslationsOnline() {
+            const input = document.getElementById('importInput').value;
+            const lines = input.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            if(lines.length === 0) return;
+
+            // 簡單模擬查詞，實際應使用 API
+            onlineImportList = lines.map((line, i) => {
+                const parts = line.split(/\s+/);
+                const word = parts[0];
+                const trans = parts.slice(1).join(' ') || '暫無翻譯（點擊編輯）';
+                return { id: Date.now() + i, word: word, trans: [trans] };
+            });
+
+            const previewBox = document.getElementById('previewBox');
+            previewBox.innerHTML = '';
+            onlineImportList.forEach((item, index) => {
+                previewBox.innerHTML += `
+                    <div class="preview-item">
+                        <span>${item.word}</span>
+                        <input type="text" class="preview-edit-input" value="${item.trans[0]}" id="pre_in_${index}">
+                    </div>
+                `;
+            });
+            document.getElementById('queryPreviewSection').style.display = 'flex';
+        }
+
+        function saveImportedWordsOnline() {
+            const targetId = document.getElementById('importTargetSelect').value;
+            if(!appData.lists[targetId]) return;
+
+            onlineImportList.forEach((item, index) => {
+                const editVal = document.getElementById(`pre_in_${index}`).value.trim();
+                item.trans = [editVal];
+                item.wrongCount = 0;
+                item.lastReviewed = Date.now();
+                appData.lists[targetId].words.push(item);
+            });
+
+            saveToStorage();
+            showToast(`成功匯入 ${onlineImportList.length} 個單字`);
+            closeImportModal();
+        }
+
+        function closeImportModal() {
+            document.getElementById('importInput').value = '';
+            document.getElementById('queryPreviewSection').style.display = 'none';
+            closeModal('importModal');
+        }
+
+        // 自我測驗邏輯
+        let quizPool = [];
+        let currentQuizIndex = 0;
+        
+        function startQuiz() {
+            const wordsArr = getCombinedWords();
+            if (wordsArr.length < 4) {
+                showToast('單字庫總數不足 4 個，無法生成測驗題目選項');
+                return;
+            }
+            quizPool = [...wordsArr].sort(() => 0.5 - Math.random()).slice(0, 5); 
+            currentQuizIndex = 0;
+            openModal('quizModal');
+            nextQuizQuestion();
+        }
+
+        function nextQuizQuestion() {
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = '';
+
+            if (currentQuizIndex >= quizPool.length) {
+                container.innerHTML = `<div class="quiz-q">🎉 測驗結束！</div>`;
+                return;
+            }
+
+            const currentQuestion = quizPool[currentQuizIndex];
+            const allWords = getCombinedWords();
+            
+            // 生成隨機選項 (含正確答案)
+            let options = [currentQuestion.trans.join(', ')];
+            while (options.length < 4) {
+                const randomWord = allWords[Math.floor(Math.random() * allWords.length)];
+                const transStr = randomWord.trans.join(', ');
+                if (!options.includes(transStr)) {
+                    options.push(transStr);
+                }
+            }
+            // 打亂選項順序
+            options.sort(() => 0.5 - Math.random());
+
+            const qDiv = document.createElement('div');
+            qDiv.className = 'quiz-q';
+            qDiv.innerText = currentQuestion.word;
+            container.appendChild(qDiv);
+
+            const optGroup = document.createElement('div');
+            optGroup.className = 'quiz-options';
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-opt-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkQuizAnswer(opt, currentQuestion.trans.join(', '));
+                optGroup.appendChild(btn);
+            });
+            container.appendChild(optGroup);
+        }
+
+        function checkQuizAnswer(selected, correct) {
+            if (selected === correct) {
+                showToast('答對了！👍');
+            } else {
+                showToast('答錯了，再加把勁！💡');
+            }
+            currentQuizIndex++;
+            setTimeout(nextQuizQuestion, 1000);
+        }
+    </script>
+</body>
+</html>
