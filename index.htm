@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Minimalist Vocab - Multi-Definition Selection</title>
+    <title>Minimalist Vocab - Live Chinese Stream Translation</title>
     <style>
         :root {
             --bg-color: #1C1C1E;
@@ -245,7 +245,7 @@
         .modal-title {
             font-size: 24px;
             font-weight: 300;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             text-align: center;
         }
         textarea, input[type="text"], select {
@@ -256,12 +256,12 @@
             padding: 14px;
             font-size: 16px;
             outline: none;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             -webkit-appearance: none;
             touch-action: manipulation;
         }
         textarea {
-            height: 110px;
+            height: 90px;
             resize: none;
             user-select: text;
             -webkit-user-select: text;
@@ -276,7 +276,7 @@
             border: 1px dashed var(--border-color);
             padding: 8px;
             border-radius: 8px;
-            max-height: 360px;
+            max-height: 280px;
             overflow-y: auto;
             margin-bottom: 15px;
             font-size: 14px;
@@ -333,6 +333,20 @@
         .def-badge:active {
             opacity: 0.6;
         }
+        .inline-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .inline-row input {
+            margin-bottom: 0;
+            flex: 1;
+        }
+        .inline-row button {
+            flex: none;
+            padding: 0 20px;
+            border-radius: 4px;
+        }
         .quiz-container {
             display: flex;
             flex-direction: column;
@@ -340,35 +354,6 @@
             justify-content: center;
             flex: 1;
             width: 100%;
-        }
-        .quiz-q {
-            font-size: 38px;
-            font-weight: 300;
-            margin-bottom: 40px;
-            text-align: center;
-        }
-        .quiz-options {
-            width: 100%;
-            max-width: 360px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-        .quiz-opt-btn {
-            width: 100%;
-            padding: 16px;
-            background: none;
-            border: 1px solid var(--text-color);
-            color: var(--text-color);
-            font-size: 16px;
-            cursor: pointer;
-            text-align: center;
-            border-radius: 8px;
-            touch-action: manipulation;
-        }
-        .quiz-opt-btn:hover {
-            background-color: var(--text-color);
-            color: var(--bg-color);
         }
     </style>
 </head>
@@ -415,19 +400,25 @@
     </div>
 
     <div class="modal" id="importModal">
-        <div class="modal-title">自動一字多義查詢匯入</div>
-        <p style="font-size: 13px; color: var(--sub-color); margin-bottom: 10px; text-align: center;">請選擇要匯入的目的地：</p>
+        <div class="modal-title">自動一字多義中文化匯入</div>
+        <p style="font-size: 13px; color: var(--sub-color); margin-bottom: 8px; text-align: center;">目的地單字表：</p>
         <select id="importTargetSelect"></select>
-        <p style="font-size: 13px; color: var(--sub-color); margin-bottom: 10px; text-align: center;">請輸入單字（一行一個）。沒打翻譯的會自動一鍵聯網查出所有詞義。</p>
-        <textarea id="importInput" placeholder="apple&#10;banana 香蕉&#10;serendipity&#10;ephemeral 短暫的"></textarea>
-        <button id="startQueryBtn" class="action-btn" style="width:100%; margin-bottom:20px;" onclick="fetchTranslationsOnline()">開始自動查詢與解析</button>
+        
+        <div class="inline-row">
+            <input type="text" id="singleWordInput" placeholder="單獨丟入單字快捷查詢 (例如: hello)">
+            <button class="action-btn" onclick="addSingleWordStream()">丟入</button>
+        </div>
+
+        <p style="font-size: 12px; color: var(--sub-color); margin-bottom: 6px;">或整批輸入（一行一個）：</p>
+        <textarea id="importInput" placeholder="apple&#10;banana&#10;serendipity 美好的巧合"></textarea>
+        <button id="startQueryBtn" class="action-btn" style="width:100%; margin-bottom:15px;" onclick="fetchTranslationsOnlineStream()">開始批量流式查詢</button>
         
         <div id="queryPreviewSection" style="display:none;">
-            <p style="margin-bottom:10px; font-weight: 500;">字典一字多義展開（可點多重標籤組合，或自行打字加入）：</p>
+            <p style="margin-bottom:8px; font-weight: 500; font-size:14px;">即時查詞預覽（查到一個即時顯示一個，點擊中文標籤可自由加字組合）：</p>
             <div class="preview-box" id="previewBox"></div>
             <button class="action-btn" style="width:100%; margin-top:10px; background-color: var(--text-color); color: var(--bg-color);" onclick="saveImportedWordsOnline()">確認無誤，匯入筒中</button>
         </div>
-        <button class="nav-btn" style="margin-top:20px; padding: 15px;" onclick="closeImportModal()">取消退出</button>
+        <button class="nav-btn" style="margin-top:10px; padding: 10px;" onclick="closeImportModal()">取消退出</button>
     </div>
 
     <div class="modal" id="quizModal">
@@ -444,8 +435,7 @@
                     name: '初始單字表',
                     words: [
                         { id: 1, word: 'serendipity', trans: ['不期而遇的美好'], wrongCount: 2, lastReviewed: Date.now() - 900000000 },
-                        { id: 2, word: 'apple', trans: ['蘋果'], wrongCount: 0, lastReviewed: Date.now() },
-                        { id: 3, word: 'ephemeral', trans: ['轉瞬即逝的'], wrongCount: 4, lastReviewed: Date.now() - 500000000 }
+                        { id: 2, word: 'apple', trans: ['蘋果'], wrongCount: 0, lastReviewed: Date.now() }
                     ]
                 }
             }
@@ -596,7 +586,6 @@
 
         function init3DControl() {
             const container = document.getElementById('stageContainer');
-            
             container.addEventListener('pointerdown', (e) => {
                 isDragging = true;
                 dragMoved = false;
@@ -604,14 +593,11 @@
                 startY = e.clientY;
                 container.setPointerCapture(e.pointerId);
             });
-
             container.addEventListener('pointermove', (e) => {
                 if (!isDragging) return;
                 const dx = e.clientX - startX;
                 const dy = e.clientY - startY;
-                if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
-                    dragMoved = true;
-                }
+                if (Math.abs(dx) > 4 || Math.abs(dy) > 4) dragMoved = true;
                 rotY += dx * 0.25;
                 rotX -= dy * 0.25;
                 rotX = Math.max(-45, Math.min(45, rotX)); 
@@ -620,46 +606,9 @@
                 updateSpaceTransform();
                 updateBillboards();
             });
-
             container.addEventListener('pointerup', (e) => {
                 isDragging = false;
                 container.releasePointerCapture(e.pointerId);
-            });
-
-            window.addEventListener('wheel', (e) => {
-                if (document.querySelector('.modal.active')) return;
-                fov += e.deltaY * 0.4;
-                fov = Math.max(250, Math.min(1400, fov)); 
-                updateSpaceTransform();
-            }, { passive: true });
-
-            container.addEventListener('touchstart', (e) => {
-                if (e.touches.length === 2) {
-                    initialPinchDist = Math.hypot(
-                        e.touches[0].pageX - e.touches[1].pageX,
-                        e.touches[0].pageY - e.touches[1].pageY
-                    );
-                }
-            }, { passive: true });
-
-            container.addEventListener('touchmove', (e) => {
-                if (e.touches.length === 2 && initialPinchDist) {
-                    const currentDist = Math.hypot(
-                        e.touches[0].pageX - e.touches[1].pageX,
-                        e.touches[0].pageY - e.touches[1].pageY
-                    );
-                    const delta = currentDist - initialPinchDist;
-                    fov -= delta * 1.2;
-                    fov = Math.max(250, Math.min(1400, fov));
-                    initialPinchDist = currentDist;
-                    updateSpaceTransform();
-                }
-            }, { passive: true });
-
-            container.addEventListener('touchend', (e) => {
-                if (e.touches.length < 2) {
-                    initialPinchDist = null;
-                }
             });
         }
 
@@ -721,7 +670,9 @@
         function openModal(id) {
             document.getElementById(id).classList.add('active');
             if (id === 'listsModal') renderListsManager();
-            if (id === 'importModal') prepareImportTargetSelect();
+            if (id === 'importModal') {
+                prepareImportTargetSelect();
+            }
         }
 
         function closeModal(id) {
@@ -735,56 +686,15 @@
             Object.keys(appData.lists).forEach(id => {
                 const list = appData.lists[id];
                 const checked = appData.currentListIds.includes(id) ? 'checked' : '';
-                
                 const row = document.createElement('div');
-                row.className = 'list-item-row';
                 row.innerHTML = `
-                    <label class="list-checkbox-label">
+                    <label style="display:flex; justify-content:space-between; margin-bottom:8px;">
                         <input type="checkbox" value="${id}" ${checked} onchange="toggleListSelection('${id}')">
                         <span>${list.name} (${list.words.length})</span>
                     </label>
-                    <div class="list-actions">
-                        <button class="sm-btn" onclick="deleteList('${id}')">刪除</button>
-                    </div>
                 `;
-                container.innerHTML += row.outerHTML;
+                container.appendChild(row);
             });
-        }
-
-        function toggleListSelection(id) {
-            const idx = appData.currentListIds.indexOf(id);
-            if (idx > -1) {
-                if (appData.currentListIds.length > 1) appData.currentListIds.splice(idx, 1);
-                else showToast('請至少保留一個單字表');
-            } else {
-                appData.currentListIds.push(id);
-            }
-            saveToStorage();
-            updateNavBarTitle();
-        }
-
-        function createNewList() {
-            const nameInput = document.getElementById('newListNameInput');
-            const name = nameInput.value.trim();
-            if (!name) return;
-            const id = 'list_' + Date.now();
-            appData.lists[id] = { name: name, words: [] };
-            nameInput.value = '';
-            saveToStorage();
-            renderListsManager();
-        }
-
-        function deleteList(id) {
-            if (Object.keys(appData.lists).length <= 1) {
-                showToast('無法刪除唯一的單字表');
-                return;
-            }
-            delete appData.lists[id];
-            appData.currentListIds = appData.currentListIds.filter(cid => cid !== id);
-            if (appData.currentListIds.length === 0) appData.currentListIds = [Object.keys(appData.lists)[0]];
-            saveToStorage();
-            updateNavBarTitle();
-            renderListsManager();
         }
 
         function prepareImportTargetSelect() {
@@ -795,127 +705,158 @@
             });
         }
 
-        async function fetchTranslationsOnline() {
+        // 使用免費翻譯網關將英文轉為繁體中文
+        async function translateToChinese(text) {
+            try {
+                const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-TW&dt=t&q=${encodeURIComponent(text)}`);
+                if(res.ok) {
+                    const data = await res.json();
+                    return data[0].map(item => item[0]).join('');
+                }
+            } catch(e) {
+                console.error("翻譯出錯", e);
+            }
+            return text;
+        }
+
+        // 單獨丟入單字快捷功能 (串流式即時加入)
+        async function addSingleWordStream() {
+            const inputEl = document.getElementById('singleWordInput');
+            const word = inputEl.value.trim();
+            if(!word) return;
+            inputEl.value = '';
+
+            document.getElementById('queryPreviewSection').style.display = 'block';
+            await processSingleWordItem(word, "", onlineImportList.length);
+        }
+
+        // 批次串流查詢核心：查到一個，立刻渲染一個
+        async function fetchTranslationsOnlineStream() {
             const btn = document.getElementById('startQueryBtn');
             btn.innerText = '正在聯網自動一字多義查詞中...';
             btn.disabled = true;
 
             const input = document.getElementById('importInput').value;
             const lines = input.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            
             if(lines.length === 0) {
-                btn.innerText = '開始自動查詢與解析';
+                btn.innerText = '開始批量流式查詢';
                 btn.disabled = false;
                 return;
             }
 
-            onlineImportList = [];
+            document.getElementById('queryPreviewSection').style.display = 'block';
 
             for (let i = 0; i < lines.length; i++) {
                 const parts = lines[i].split(/\s+/);
                 const word = parts[0];
                 let userTrans = parts.slice(1).join(' ');
-
-                let candidates = [];
-                if (userTrans) {
-                    candidates.push(userTrans);
-                } else {
-                    try {
-                        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
-                        if (response.ok) {
-                            const data = await response.json();
-                            if (data && data[0] && data[0].meanings) {
-                                data[0].meanings.forEach(m => {
-                                    const pos = m.partOfSpeech;
-                                    if (m.definitions) {
-                                        m.definitions.slice(0, 3).forEach(d => {
-                                            candidates.push(`[${pos}] ${d.definition}`);
-                                        });
-                                    }
-                                });
-                            }
-                        }
-                    } catch (err) {
-                        console.error('API 查詢失敗', err);
-                    }
-                }
-
-                if (candidates.length === 0) {
-                    candidates.push('[暫無內建釋義，可在此手打加字]');
-                }
-
-                onlineImportList.push({
-                    id: Date.now() + i,
-                    word: word,
-                    allCandidates: candidates,
-                    defaultText: candidates[0] || ''
-                });
+                
+                // 異步執行，不需要等前一個單字查完，即可直接先上架 DOM 節點
+                processSingleWordItem(word, userTrans, onlineImportList.length);
             }
 
-            renderPreviewList();
-            document.getElementById('queryPreviewSection').style.display = 'block';
-            btn.innerText = '開始自動查詢與解析';
+            btn.innerText = '開始批量流式查詢';
             btn.disabled = false;
         }
 
-        function renderPreviewList() {
+        // 處理單個單字，完成即時插入 PreviewBox
+        async function processSingleWordItem(word, userTrans, localIndex) {
+            // 1. 先建立一個空白的卡片佔位符，達到「馬上看到」的目的
             const previewBox = document.getElementById('previewBox');
-            previewBox.innerHTML = '';
+            const card = document.createElement('div');
+            card.className = 'preview-card';
+            card.id = `preview_card_${localIndex}`;
+            card.innerHTML = `
+                <div class="preview-header">
+                    <span class="preview-word-title">${word}</span>
+                    <span style="font-size:12px; color:var(--sub-color);">查詢中...</span>
+                </div>
+                <input type="text" class="preview-edit-input" id="pre_in_${localIndex}" value="讀取中...">
+                <div class="definition-tags-container" id="tags_container_${localIndex}"></div>
+            `;
+            previewBox.appendChild(card);
+            previewBox.scrollTop = previewBox.scrollHeight;
+
+            let candidates = [];
             
-            onlineImportList.forEach((item, index) => {
-                const card = document.createElement('div');
-                card.className = 'preview-card';
-                
-                // 標題與單字名
-                const header = document.createElement('div');
-                header.className = 'preview-header';
-                header.innerHTML = `<span class="preview-word-title">${item.word}</span>`;
-                
-                // 最終採用的文字輸入框 (可自己手動加字、修改)
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.className = 'preview-edit-input';
-                input.id = `pre_in_${index}`;
-                input.value = item.defaultText;
-                
-                // 列出所有查到的一字多義標籤
-                const tagsContainer = document.createElement('div');
-                tagsContainer.className = 'definition-tags-container';
-                
-                item.allCandidates.forEach(cand => {
-                    const badge = document.createElement('button');
-                    badge.type = 'button';
-                    badge.className = 'def-badge';
-                    badge.innerText = cand;
-                    // 點擊標籤：如果輸入框是預設空白或提示字，直接覆蓋；否則用逗號串接
-                    badge.onclick = () => {
-                        const curVal = input.value.trim();
-                        if (curVal === '' || curVal.startsWith('[暫無內建釋義') || curVal === item.allCandidates[0]) {
-                            input.value = cand;
-                        } else {
-                            input.value = curVal + ', ' + cand;
+            if (userTrans) {
+                candidates.push(userTrans);
+            } else {
+                try {
+                    const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data && data[0] && data[0].meanings) {
+                            for (const m of data[0].meanings) {
+                                const pos = m.partOfSpeech;
+                                // 翻成中文詞性
+                                const posZh = await translateToChinese(pos);
+                                if (m.definitions) {
+                                    // 抓取前 2 個釋義進行中文化
+                                    for (const d of m.definitions.slice(0, 2)) {
+                                        const translatedDef = await translateToChinese(d.definition);
+                                        candidates.push(`[${posZh}] ${translatedDef}`);
+                                    }
+                                }
+                            }
                         }
-                    };
-                    tagsContainer.appendChild(badge);
-                });
-
-                // 一鍵全選按鈕 (若有很多意思想全打包)
-                if (item.allCandidates.length > 1) {
-                    const selectAllBtn = document.createElement('button');
-                    selectAllBtn.type = 'button';
-                    selectAllBtn.className = 'def-badge';
-                    selectAllBtn.style.border = '1px dashed var(--text-color)';
-                    selectAllBtn.innerText = '➕ 全選包含';
-                    selectAllBtn.onclick = () => {
-                        input.value = item.allCandidates.join(', ');
-                    };
-                    tagsContainer.appendChild(selectAllBtn);
+                    }
+                } catch (err) {
+                    console.error('API 查詢失敗', err);
                 }
+            }
 
-                card.appendChild(header);
-                card.appendChild(input);
-                card.appendChild(tagsContainer);
-                previewBox.appendChild(card);
+            if (candidates.length === 0) {
+                candidates.push('[暫無內建釋義，可在此手打加字]');
+            }
+
+            // 2. 將查詢完後的數據推入全域陣列中
+            const itemObj = {
+                id: Date.now() + localIndex,
+                word: word,
+                allCandidates: candidates,
+                defaultText: candidates[0] || ''
+            };
+            onlineImportList[localIndex] = itemObj;
+
+            // 3. 更新剛才的佔位卡片內容
+            const inputEl = document.getElementById(`pre_in_${localIndex}`);
+            inputEl.value = itemObj.defaultText;
+            
+            const headerEl = card.querySelector('.preview-header');
+            headerEl.innerHTML = `<span class="preview-word-title">${word}</span>`;
+
+            const tagsContainer = document.getElementById(`tags_container_${localIndex}`);
+            tagsContainer.innerHTML = '';
+
+            itemObj.allCandidates.forEach(cand => {
+                const badge = document.createElement('button');
+                badge.type = 'button';
+                badge.className = 'def-badge';
+                badge.innerText = cand;
+                badge.onclick = () => {
+                    const curVal = inputEl.value.trim();
+                    if (curVal === '' || curVal.startsWith('[暫無內建') || curVal === itemObj.allCandidates[0]) {
+                        inputEl.value = cand;
+                    } else {
+                        inputEl.value = curVal + ', ' + cand;
+                    }
+                };
+                tagsContainer.appendChild(badge);
             });
+
+            if (itemObj.allCandidates.length > 1) {
+                const selectAllBtn = document.createElement('button');
+                selectAllBtn.type = 'button';
+                selectAllBtn.className = 'def-badge';
+                selectAllBtn.style.border = '1px dashed var(--text-color)';
+                selectAllBtn.innerText = '➕ 全選打包';
+                selectAllBtn.onclick = () => {
+                    inputEl.value = itemObj.allCandidates.join(', ');
+                };
+                tagsContainer.appendChild(selectAllBtn);
+            }
         }
 
         function saveImportedWordsOnline() {
@@ -923,7 +864,9 @@
             if(!appData.lists[targetId]) return;
 
             onlineImportList.forEach((item, index) => {
-                const editVal = document.getElementById(`pre_in_${index}`).value.trim();
+                if(!item) return; // 跳過未查完的
+                const inputEl = document.getElementById(`pre_in_${index}`);
+                const editVal = inputEl ? inputEl.value.trim() : item.defaultText;
                 appData.lists[targetId].words.push({
                     id: item.id,
                     word: item.word,
@@ -934,23 +877,25 @@
             });
 
             saveToStorage();
-            showToast(`成功匯入 ${onlineImportList.length} 個單字`);
+            showToast(`成功匯入新增單字`);
             closeImportModal();
         }
 
         function closeImportModal() {
             document.getElementById('importInput').value = '';
+            document.getElementById('singleWordInput').value = '';
+            document.getElementById('previewBox').innerHTML = '';
             document.getElementById('queryPreviewSection').style.display = 'none';
+            onlineImportList = [];
             closeModal('importModal');
         }
 
         let quizPool = [];
         let currentQuizIndex = 0;
-        
         function startQuiz() {
             const wordsArr = getCombinedWords();
             if (wordsArr.length < 4) {
-                showToast('單字庫總數不足 4 個，無法生成測驗題目選項');
+                showToast('單字庫總數不足 4 個，無法生成測驗');
                 return;
             }
             quizPool = [...wordsArr].sort(() => 0.5 - Math.random()).slice(0, 5); 
@@ -962,50 +907,40 @@
         function nextQuizQuestion() {
             const container = document.getElementById('quizContainer');
             container.innerHTML = '';
-
             if (currentQuizIndex >= quizPool.length) {
-                container.innerHTML = `<div class="quiz-q">🎉 測驗結束！</div>`;
+                container.innerHTML = `<div style="font-size:24px;">🎉 測驗結束！</div>`;
                 return;
             }
-
             const currentQuestion = quizPool[currentQuizIndex];
             const allWords = getCombinedWords();
-            
             let options = [currentQuestion.trans.join(', ')];
             while (options.length < 4) {
                 const randomWord = allWords[Math.floor(Math.random() * allWords.length)];
                 const transStr = randomWord.trans.join(', ');
-                if (!options.includes(transStr)) {
-                    options.push(transStr);
-                }
+                if (!options.includes(transStr)) options.push(transStr);
             }
             options.sort(() => 0.5 - Math.random());
 
             const qDiv = document.createElement('div');
-            qDiv.className = 'quiz-q';
+            qDiv.style.fontSize = "32px";
+            qDiv.style.marginBottom = "20px";
             qDiv.innerText = currentQuestion.word;
             container.appendChild(qDiv);
 
-            const optGroup = document.createElement('div');
-            optGroup.className = 'quiz-options';
             options.forEach(opt => {
                 const btn = document.createElement('button');
-                btn.className = 'quiz-opt-btn';
+                btn.style.width = "100%";
+                btn.style.padding = "12px";
+                btn.style.marginBottom = "8px";
                 btn.innerText = opt;
-                btn.onclick = () => checkQuizAnswer(opt, currentQuestion.trans.join(', '));
-                optGroup.appendChild(btn);
+                btn.onclick = () => {
+                    if (opt === currentQuestion.trans.join(', ')) showToast('答對了！👍');
+                    else showToast('答錯了！💡');
+                    currentQuizIndex++;
+                    setTimeout(nextQuizQuestion, 800);
+                };
+                container.appendChild(btn);
             });
-            container.appendChild(optGroup);
-        }
-
-        function checkQuizAnswer(selected, correct) {
-            if (selected === correct) {
-                showToast('答對了');
-            } else {
-                showToast('答錯了');
-            }
-            currentQuizIndex++;
-            setTimeout(nextQuizQuestion, 1000);
         }
     </script>
 </body>
