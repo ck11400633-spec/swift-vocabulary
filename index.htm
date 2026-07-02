@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Minimalist Vocab</title>
+    <title>Minimalist Vocab - Smart Fast Import</title>
     <style>
         :root {
             --bg-color: #1C1C1E;
@@ -420,23 +420,23 @@
     </div>
 
     <div class="modal" id="importModal">
-        <div class="modal-title">自動一字多義中文化匯入</div>
+        <div class="modal-title">短翻譯流式匯入</div>
         <p style="font-size: 13px; color: var(--sub-color); margin-bottom: 8px; text-align: center;">目的地單字表：</p>
         <select id="importTargetSelect"></select>
         
         <div class="inline-row">
-            <input type="text" id="singleWordInput" placeholder="單獨丟入單字快捷查詢 (例如: hello)">
+            <input type="text" id="singleWordInput" placeholder="單獨快捷查詢 (選完意思直接進筒)">
             <button class="action-btn" onclick="addSingleWordStream()">丟入</button>
         </div>
 
         <p style="font-size: 12px; color: var(--sub-color); margin-bottom: 6px;">或整批輸入（一行一個）：</p>
-        <textarea id="importInput" placeholder="apple&#10;banana&#10;serendipity 美好的巧合"></textarea>
+        <textarea id="importInput" placeholder="apple&#10;banana&#10;serendipity 美好巧合"></textarea>
         <button id="startQueryBtn" class="action-btn" style="width:100%; margin-bottom:15px;" onclick="fetchTranslationsOnlineStream()">開始批量流式查詢</button>
         
         <div id="queryPreviewSection" style="display:none;">
-            <p style="margin-bottom:8px; font-weight: 500; font-size:14px;">即時查詞預覽（可點擊中文標籤組合、或右側 ❌ 清空手寫）：</p>
+            <p style="margin-bottom:8px; font-weight: 500; font-size:14px;">即時查詞預覽（點擊標籤選完意思，點擊「獨立送出」或下方批量匯入）：</p>
             <div class="preview-box" id="previewBox"></div>
-            <button class="action-btn" style="width:100%; margin-top:10px; background-color: var(--text-color); color: var(--bg-color);" onclick="saveImportedWordsOnline()">確認無誤，匯入筒中</button>
+            <button class="action-btn" style="width:100%; margin-top:10px; background-color: var(--text-color); color: var(--bg-color);" onclick="saveImportedWordsOnline()">確認無誤，整批匯入筒中</button>
         </div>
         <button class="nav-btn" style="margin-top:10px; padding: 10px;" onclick="closeImportModal()">取消退出</button>
     </div>
@@ -472,7 +472,6 @@
         let isDragging = false;
         let dragMoved = false;
         let startX, startY;
-        let initialPinchDist = null;
         let fov = 400; 
 
         function getCombinedWords() {
@@ -725,7 +724,7 @@
             });
         }
 
-        // 使用免費翻譯網關將英文轉為繁體中文
+        // 使用免費翻譯網關將英文短釋義轉為繁體中文
         async function translateToChinese(text) {
             try {
                 const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-TW&dt=t&q=${encodeURIComponent(text)}`);
@@ -739,7 +738,7 @@
             return text;
         }
 
-        // 單獨丟入快捷查詢
+        // 單獨丟入快捷查詢 (支援隨時獨立丟入進筒)
         async function addSingleWordStream() {
             const inputEl = document.getElementById('singleWordInput');
             const word = inputEl.value.trim();
@@ -747,13 +746,14 @@
             inputEl.value = '';
 
             document.getElementById('queryPreviewSection').style.display = 'block';
-            await processSingleWordItem(word, "", onlineImportList.length);
+            // isSingle = true
+            await processSingleWordItem(word, "", onlineImportList.length, true);
         }
 
         // 批量流式分步上架
         async function fetchTranslationsOnlineStream() {
             const btn = document.getElementById('startQueryBtn');
-            btn.innerText = '正在聯網自動一字多義查詞中...';
+            btn.innerText = '正在聯網自動短詞查詞中...';
             btn.disabled = true;
 
             const input = document.getElementById('importInput').value;
@@ -772,27 +772,33 @@
                 const word = parts[0];
                 let userTrans = parts.slice(1).join(' ');
                 
-                processSingleWordItem(word, userTrans, onlineImportList.length);
+                processSingleWordItem(word, userTrans, onlineImportList.length, false);
             }
 
             btn.innerText = '開始批量流式查詢';
             btn.disabled = false;
         }
 
-        // 處理單個單字節點
-        async function processSingleWordItem(word, userTrans, localIndex) {
+        // 處理單個單字節點：改抓同義短詞 & 支援獨立立刻丟入功能
+        async function processSingleWordItem(word, userTrans, localIndex, isSingle = false) {
             const previewBox = document.getElementById('previewBox');
             const card = document.createElement('div');
             card.className = 'preview-card';
             card.id = `preview_card_${localIndex}`;
+            
+            // 如果是單獨丟入，加一個可以直接丟入的獨立按鈕
+            const actionButtonHtml = isSingle 
+                ? `<button type="button" class="clear-btn" style="background:#E5E5EA; color:#1C1C1E;" onclick="saveSingleWordDirectly(${localIndex})">📥 獨立送出</button>`
+                : `<button type="button" class="clear-btn" onclick="clearPreviewInput(${localIndex})">❌ 清除</button>`;
+
             card.innerHTML = `
                 <div class="preview-header">
-                    <span class="preview-word-title">${word}</span>
+                    <span class="preview-word-title" style="${isSingle ? 'color:#FFD60A;' : ''}">${word} ${isSingle ? '(單獨追加)' : ''}</span>
                     <span style="font-size:12px; color:var(--sub-color);">查詢中...</span>
                 </div>
                 <div class="input-with-clear">
                     <input type="text" class="preview-edit-input" id="pre_in_${localIndex}" value="讀取中...">
-                    <button type="button" class="clear-btn" onclick="clearPreviewInput(${localIndex})">❌ 清除</button>
+                    ${actionButtonHtml}
                 </div>
                 <div class="definition-tags-container" id="tags_container_${localIndex}"></div>
             `;
@@ -812,10 +818,21 @@
                             for (const m of data[0].meanings) {
                                 const pos = m.partOfSpeech;
                                 const posZh = await translateToChinese(pos);
-                                if (m.definitions) {
-                                    for (const d of m.definitions.slice(0, 2)) {
-                                        const translatedDef = await translateToChinese(d.definition);
-                                        candidates.push(`[${posZh}] ${translatedDef}`);
+                                
+                                // 1. 優先提取短同義詞 (Synonyms) 確保是短翻譯
+                                if (m.synonyms && m.synonyms.length > 0) {
+                                    for (const syn of m.synonyms.slice(0, 3)) {
+                                        const synZh = await translateToChinese(syn);
+                                        candidates.push(`[${posZh}] ${synZh}`);
+                                    }
+                                }
+                                // 2. 若無同義詞，截取原本釋義的第一條做極短處理
+                                if (candidates.length < 2 && m.definitions) {
+                                    for (const d of m.definitions.slice(0, 1)) {
+                                        // 只取前 5 個英文單字去翻譯，強制變成短翻譯
+                                        const shortEng = d.definition.split(' ').slice(0, 5).join(' ');
+                                        const transZh = await translateToChinese(shortEng);
+                                        candidates.push(`[${posZh}] ${transZh}`);
                                     }
                                 }
                             }
@@ -826,15 +843,20 @@
                 }
             }
 
+            // 去除重複候選詞
+            candidates = [...new Set(candidates)];
+
             if (candidates.length === 0) {
-                candidates.push('[暫無內建釋義，可在此手打加字]');
+                candidates.push('[暫無內建釋義，可點此手打]');
             }
 
             const itemObj = {
                 id: Date.now() + localIndex,
                 word: word,
                 allCandidates: candidates,
-                defaultText: candidates[0] || ''
+                defaultText: candidates[0] || '',
+                isSingle: isSingle,
+                isSaved: false
             };
             onlineImportList[localIndex] = itemObj;
 
@@ -842,7 +864,7 @@
             inputEl.value = itemObj.defaultText;
             
             const headerEl = card.querySelector('.preview-header');
-            headerEl.innerHTML = `<span class="preview-word-title">${word}</span>`;
+            headerEl.innerHTML = `<span class="preview-word-title" style="${isSingle ? 'color:#FFD60A;' : ''}">${word} ${isSingle ? '(單獨追加)' : ''}</span>`;
 
             const tagsContainer = document.getElementById(`tags_container_${localIndex}`);
             tagsContainer.innerHTML = '';
@@ -854,8 +876,7 @@
                 badge.innerText = cand;
                 badge.onclick = () => {
                     const curVal = inputEl.value.trim();
-                    // 如果原本是提示字、預設字或空白，點擊時直接取代，不再錯誤串接
-                    if (curVal === '' || curVal.startsWith('[暫無內建') || curVal === '讀取中...' || curVal === itemObj.allCandidates[0]) {
+                    if (curVal === '' || curVal.startsWith('[暫無') || curVal === '讀取中...' || curVal === itemObj.allCandidates[0]) {
                         inputEl.value = cand;
                     } else {
                         inputEl.value = curVal + ', ' + cand;
@@ -877,7 +898,6 @@
             }
         }
 
-        // 新增：清除按鈕的獨立觸發事件
         function clearPreviewInput(index) {
             const inputEl = document.getElementById(`pre_in_${index}`);
             if (inputEl) {
@@ -886,12 +906,45 @@
             }
         }
 
+        // 新增：獨立單獨丟入功能，選完直接塞進 LocalStorage 桶內
+        function saveSingleWordDirectly(index) {
+            const item = onlineImportList[index];
+            if (!item || item.isSaved) return;
+
+            const targetId = document.getElementById('importTargetSelect').value;
+            if (!appData.lists[targetId]) return;
+
+            const inputEl = document.getElementById(`pre_in_${index}`);
+            const finalTrans = inputEl ? inputEl.value.trim() : item.defaultText;
+
+            appData.lists[targetId].words.push({
+                id: item.id,
+                word: item.word,
+                trans: [finalTrans || '暫無翻譯'],
+                wrongCount: 0,
+                lastReviewed: Date.now()
+            });
+
+            saveToStorage();
+            item.isSaved = true;
+
+            // 視覺上淡出或標註已送出
+            const card = document.getElementById(`preview_card_${index}`);
+            if (card) {
+                card.style.opacity = '0.4';
+                card.querySelector('.input-with-clear').innerHTML = `<span style="font-size:13px; color:#34C759; padding: 10px 0;">✓ 已單獨安全加進字筒</span>`;
+            }
+            showToast(`「${item.word}」已單獨加進字筒`);
+        }
+
+        // 整批匯入 (會自動跳過已經單獨送出的單字)
         function saveImportedWordsOnline() {
             const targetId = document.getElementById('importTargetSelect').value;
             if(!appData.lists[targetId]) return;
 
+            let count = 0;
             onlineImportList.forEach((item, index) => {
-                if(!item) return; 
+                if(!item || item.isSaved) return; 
                 const inputEl = document.getElementById(`pre_in_${index}`);
                 const editVal = inputEl ? inputEl.value.trim() : item.defaultText;
                 appData.lists[targetId].words.push({
@@ -901,10 +954,11 @@
                     wrongCount: 0,
                     lastReviewed: Date.now()
                 });
+                count++;
             });
 
             saveToStorage();
-            showToast(`成功匯入新增單字`);
+            showToast(`成功匯入新增 ${count} 個單字`);
             closeImportModal();
         }
 
