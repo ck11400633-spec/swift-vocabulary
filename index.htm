@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Minimalist Vocab - Universal Fix</title>
+    <title>Minimalist Vocab - Multi-Definition Selection</title>
     <style>
         :root {
             --bg-color: #1C1C1E;
@@ -13,6 +13,9 @@
             --overlay-bg: rgba(28,28,30,0.96);
             --dot-color: #FFFFFF;
             --toast-bg: rgba(255,255,255,0.1);
+            --badge-bg: #2C2C2E;
+            --badge-active-bg: #E5E5EA;
+            --badge-active-text: #1C1C1E;
         }
         [data-theme="light"] {
             --bg-color: #ffffff;
@@ -22,6 +25,9 @@
             --overlay-bg: rgba(255,255,255,0.96);
             --dot-color: #111111;
             --toast-bg: rgba(0,0,0,0.05);
+            --badge-bg: #eeeeee;
+            --badge-active-bg: #111111;
+            --badge-active-text: #ffffff;
         }
         * {
             box-sizing: border-box;
@@ -29,7 +35,6 @@
             padding: 0;
             user-select: none;
             -webkit-user-select: none;
-            touch-action: none; 
         }
         body {
             background-color: var(--bg-color);
@@ -79,36 +84,34 @@
         .stage-container {
             width: 100%;
             height: 100%;
+            perspective: 400px;
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: grab;
-            position: relative;
-            transition: opacity 0.4s ease, filter 0.4s ease; /* 讓背景淡化更平滑 */
+            touch-action: none;
         }
         .stage-container:active {
             cursor: grabbing;
-        }
-        /* 當其他頁面打開時，用於弱化單字海視覺與干擾的樣式 */
-        .stage-container.blur-out {
-            opacity: 0.15;
-            filter: blur(4px);
-            pointer-events: none; /* 雙重保險，完全禁止任何單字卡點擊 */
         }
         .space3d {
             width: 100%;
             height: 100%;
             position: relative;
+            transform-style: preserve-3d;
+            transform-origin: center center;
         }
         .word-card {
             position: absolute;
             left: 50%;
             top: 50%;
+            transform-style: preserve-3d;
             cursor: pointer;
             white-space: nowrap;
-            padding: 20px; 
-            transform-origin: center center;
-            will-change: transform, opacity;
+            padding: 15px;
+            backface-visibility: visible; 
+            margin-left: -50px; 
+            margin-top: -20px;
         }
         .word-text {
             font-size: 24px; 
@@ -139,6 +142,7 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s ease;
+            touch-action: none;
         }
         .focus-overlay.active {
             opacity: 1;
@@ -257,73 +261,77 @@
             touch-action: manipulation;
         }
         textarea {
-            height: 150px;
+            height: 110px;
             resize: none;
             user-select: text;
             -webkit-user-select: text;
         }
-        .list-item-row {
+        #queryPreviewSection {
+            flex: none;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 10px;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .list-item-row:hover {
-            background-color: var(--border-color);
-        }
-        .list-checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex: 1;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .list-checkbox-label input {
-            width: 20px;
-            height: 20px;
-        }
-        .list-actions {
-            display: flex;
-            gap: 12px;
-        }
-        .sm-btn {
-            font-size: 14px;
-            color: var(--sub-color);
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 6px 4px;
-            touch-action: manipulation;
+            flex-direction: column;
+            margin-bottom: 20px;
         }
         .preview-box {
             border: 1px dashed var(--border-color);
-            padding: 15px;
+            padding: 8px;
             border-radius: 8px;
-            max-height: 200px;
+            max-height: 360px;
             overflow-y: auto;
             margin-bottom: 15px;
             font-size: 14px;
+            touch-action: pan-y;
+            -webkit-overflow-scrolling: touch;
         }
-        .preview-item {
+        .preview-card {
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .preview-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 4px;
-            gap: 15px;
+        }
+        .preview-word-title {
+            font-weight: 600;
+            font-size: 16px;
+            letter-spacing: 0.5px;
         }
         .preview-edit-input {
-            flex: 1;
-            max-width: 200px;
+            width: 100%;
             font-size: 14px;
-            padding: 6px 8px;
-            margin-bottom: 0;
-            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 4px;
+            border-radius: 6px;
             user-select: text;
             -webkit-user-select: text;
+        }
+        .definition-tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 2px;
+        }
+        .def-badge {
+            background-color: var(--badge-bg);
+            color: var(--text-color);
+            padding: 6px 12px;
+            border-radius: 14px;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s;
+            max-width: 100%;
+            text-align: left;
+            word-break: break-all;
+            white-space: normal;
+            touch-action: manipulation;
+        }
+        .def-badge:active {
+            opacity: 0.6;
         }
         .quiz-container {
             display: flex;
@@ -373,7 +381,7 @@
             <button class="nav-btn" onclick="startQuiz()">測驗</button>
         </div>
         <div class="nav-right">
-            <button class="nav-btn" id="themeBtn" onclick="toggleTheme()">切換至淺色模式</button>
+            <button class="nav-btn" id="themeBtn" onclick="toggleTheme()">深色模式</button>
         </div>
     </div>
     
@@ -407,19 +415,19 @@
     </div>
 
     <div class="modal" id="importModal">
-        <div class="modal-title">自動查詞匯入</div>
+        <div class="modal-title">自動一字多義查詢匯入</div>
         <p style="font-size: 13px; color: var(--sub-color); margin-bottom: 10px; text-align: center;">請選擇要匯入的目的地：</p>
         <select id="importTargetSelect"></select>
-        <p style="font-size: 13px; color: var(--sub-color); margin-bottom: 10px; text-align: center;">請輸入單字（一行一個）。支援直接帶有翻譯，例如：apple 蘋果</p>
-        <textarea id="importInput" placeholder="apple 蘋果&#10;banana 香蕉&#10;serendipity 不期而遇的美好&#10;ephemeral"></textarea>
+        <p style="font-size: 13px; color: var(--sub-color); margin-bottom: 10px; text-align: center;">請輸入單字（一行一個）。沒打翻譯的會自動一鍵聯網查出所有詞義。</p>
+        <textarea id="importInput" placeholder="apple&#10;banana 香蕉&#10;serendipity&#10;ephemeral 短暫的"></textarea>
         <button id="startQueryBtn" class="action-btn" style="width:100%; margin-bottom:20px;" onclick="fetchTranslationsOnline()">開始自動查詢與解析</button>
         
-        <div id="queryPreviewSection" style="display:none; flex: 1; display: flex; flex-direction: column;">
-            <p style="margin-bottom:10px; font-weight: 500;">字典查詢預覽（可在下方框內直接修改翻譯）：</p>
+        <div id="queryPreviewSection" style="display:none;">
+            <p style="margin-bottom:10px; font-weight: 500;">字典一字多義展開（可點多重標籤組合，或自行打字加入）：</p>
             <div class="preview-box" id="previewBox"></div>
             <button class="action-btn" style="width:100%; margin-top:10px; background-color: var(--text-color); color: var(--bg-color);" onclick="saveImportedWordsOnline()">確認無誤，匯入筒中</button>
         </div>
-        <button class="nav-btn" style="margin-top:auto; padding: 15px;" onclick="closeImportModal()">取消退出</button>
+        <button class="nav-btn" style="margin-top:20px; padding: 15px;" onclick="closeImportModal()">取消退出</button>
     </div>
 
     <div class="modal" id="quizModal">
@@ -436,15 +444,8 @@
                     name: '初始單字表',
                     words: [
                         { id: 1, word: 'serendipity', trans: ['不期而遇的美好'], wrongCount: 2, lastReviewed: Date.now() - 900000000 },
-                        { id: 2, word: 'こもれび', trans: ['從樹葉縫隙漏下來的陽光'], wrongCount: 0, lastReviewed: Date.now() },
-                        { id: 3, word: 'ephemeral', trans: ['轉瞬即逝的'], wrongCount: 4, lastReviewed: Date.now() - 500000000 },
-                        { id: 4, word: 'しんりんよく', trans: ['森林浴'], wrongCount: 1, lastReviewed: Date.now() },
-                        { id: 5, word: 'wanderlust', trans: ['漫遊癖'], wrongCount: 0, lastReviewed: Date.now() },
-                        { id: 6, word: 'nefarious', trans: ['邪惡的'], wrongCount: 3, lastReviewed: Date.now() - 600000000 },
-                        { id: 7, word: 'sonder', trans: ['意識到每個人都有其獨特的生活'], wrongCount: 1, lastReviewed: Date.now() },
-                        { id: 8, word: 'solitude', trans: ['獨處'], wrongCount: 0, lastReviewed: Date.now() },
-                        { id: 9, word: 'melancholy', trans: ['憂鬱'], wrongCount: 0, lastReviewed: Date.now() },
-                        { id: 10, word: 'luminous', trans: ['發光的'], wrongCount: 2, lastReviewed: Date.now() }
+                        { id: 2, word: 'apple', trans: ['蘋果'], wrongCount: 0, lastReviewed: Date.now() },
+                        { id: 3, word: 'ephemeral', trans: ['轉瞬即逝的'], wrongCount: 4, lastReviewed: Date.now() - 500000000 }
                     ]
                 }
             }
@@ -457,32 +458,12 @@
 
         let currentFocusIndex = -1;
         let onlineImportList = [];
-        
         let rotX = 0, rotY = 0;
-        let dynamicRadius = 380; 
-        const CAMERA_FOCAL = 400; 
-
-        const MIN_USER_Z = -500; 
-        const MAX_USER_Z = -100; 
-        let userZ = MAX_USER_Z;   
-
-        let autoRotSpeedY = 0.04; 
-        let vx = 0, vy = 0; 
-        
         let isDragging = false;
+        let dragMoved = false;
         let startX, startY;
-        let lastTime, lastX, lastY; 
-        let startPinchZ = 0;
-        let startTouchDist = 0;
-        let animationFrameId = null;
-
-        let totalDragDistance = 0;
-
-        // 檢查目前畫面上是否有任何彈出視窗（Modal）或是單字聚焦卡（Focus Overlay）處於開啟狀態
-        function isAnyOverlayOpen() {
-            return document.querySelector('.modal.active') !== null || 
-                   document.getElementById('focusOverlay').classList.includes('active');
-        }
+        let initialPinchDist = null;
+        let fov = 400; 
 
         function getCombinedWords() {
             let combined = [];
@@ -499,12 +480,11 @@
         window.onload = function() {
             const savedTheme = localStorage.getItem('theme') || 'dark';
             document.documentElement.setAttribute('data-theme', savedTheme);
-            document.getElementById('themeBtn').innerText = savedTheme === 'dark' ? '切換至淺色模式' : '切換至深色模式';
-            
+            document.getElementById('themeBtn').innerText = savedTheme === 'dark' ? '淺色模式' : '深色模式';
             updateNavBarTitle();
             renderCylinderSpace();
             init3DControl();
-            startRenderLoop();
+            updateSpaceTransform();
         };
 
         function showToast(msg) {
@@ -523,7 +503,7 @@
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
-            document.getElementById('themeBtn').innerText = newTheme === 'dark' ? '切換至淺色模式' : '切換至深色模式';
+            document.getElementById('themeBtn').innerText = newTheme === 'dark' ? '淺色模式' : '深色模式';
         }
 
         function updateNavBarTitle() {
@@ -540,40 +520,37 @@
             space.innerHTML = '';
             const wordsArr = getCombinedWords();
             if (wordsArr.length === 0) {
-                space.innerHTML = `<div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:var(--sub-color); font-size:14px; text-align:center; width:80%;">目前無選取單字包或包內空空的</div>`;
+                space.innerHTML = `<div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:var(--sub-color); font-size:14px; text-align:center; width:80%;">目前無選取單字包或包內空空的，請點選「匯入」或更改單字包勾選</div>`;
                 return;
             }
 
             const totalWords = wordsArr.length;
-            dynamicRadius = 380 + (totalWords * 4);
-            dynamicRadius = Math.max(380, Math.min(1000, dynamicRadius));
-
-            const wordsPerLayer = dynamicRadius > 500 ? 12 : 8;
+            const wordsPerLayer = totalWords > 12 ? 10 : totalWords;
             const heightStep = 110; 
+            const radius = 600; 
 
             wordsArr.forEach((item, index) => {
                 const card = document.createElement('div');
                 card.className = 'word-card';
                 card.setAttribute('data-index', index);
 
-                const layer = Math.floor(index / wordsPerLayer);
+                const layer = Math.floor(index / wordsPerLayer); 
                 const totalLayers = Math.ceil(totalWords / wordsPerLayer);
-                const layerIndex = index % wordsPerLayer;
+                const layerIndex = index % wordsPerLayer; 
 
-                const randomAngleOffset = (Math.random() - 0.5) * (2 * Math.PI / wordsPerLayer) * 0.7;
-                const randomHeightOffset = (Math.random() - 0.5) * heightStep * 0.6;
+                const theta = (layerIndex / wordsPerLayer) * 2 * Math.PI;
 
-                const theta = ((layerIndex / wordsPerLayer) * 2 * Math.PI) + randomAngleOffset;
-                const origX = dynamicRadius * Math.sin(theta);
-                const origZ = dynamicRadius * Math.cos(theta);
-                const origY = ((layer - (totalLayers - 1) / 2) * heightStep) + randomHeightOffset;
-
-                card.dataset.origX = origX;
-                card.dataset.origY = origY;
-                card.dataset.origZ = origZ;
+                const x = radius * Math.sin(theta);
+                const z = radius * Math.cos(theta);
+                const y = (layer - (totalLayers - 1) / 2) * heightStep;
 
                 const daysUnreviewed = (Date.now() - item.lastReviewed) / (1000 * 60 * 60 * 24);
-                card.dataset.baseScale = daysUnreviewed > 3 ? 1.35 : 1;
+                let sizeScale = daysUnreviewed > 3 ? 1.35 : 1;
+                
+                card.dataset.x = x;
+                card.dataset.y = y;
+                card.dataset.z = z;
+                card.dataset.scale = sizeScale;
 
                 const textSpan = document.createElement('span');
                 textSpan.className = 'word-text';
@@ -591,187 +568,97 @@
                     textSpan.appendChild(dot);
                 }
                 card.appendChild(textSpan);
-                
-                card.addEventListener('click', (e) => {
-                    // 如果有視窗開啟，直接拒絕任何點擊卡片行為
-                    if (document.querySelector('.modal.active')) return;
-                    
-                    if (totalDragDistance < 8) {
-                        e.stopPropagation(); 
-                        vx = 0;
-                        vy = 0;
-                        openFocus(index);
-                    }
+                card.addEventListener('pointerup', (e) => {
+                    if (dragMoved) return;
+                    e.stopPropagation();
+                    openFocus(index);
                 });
-
                 space.appendChild(card);
             });
+            updateBillboards();
         }
 
-        function updatePseudo3DProjection() {
+        function updateBillboards() {
             const cards = document.querySelectorAll('.word-card');
-            if (cards.length === 0) return;
-
-            const radX = (rotX * Math.PI) / 180;
-            const radY = (rotY * Math.PI) / 180;
-
-            const cosX = Math.cos(radX), sinX = Math.sin(radX);
-            const cosY = Math.cos(radY), sinY = Math.sin(radY);
-
             cards.forEach(card => {
-                let x = parseFloat(card.dataset.origX);
-                let y = parseFloat(card.dataset.origY);
-                let z = parseFloat(card.dataset.origZ);
-
-                let x1 = x * cosY - z * sinY;
-                let z1 = x * sinY + z * cosY;
-                let y2 = y * cosX - z1 * sinX;
-                let z2 = y * sinX + z1 * cosX;
-
-                let finalZ = z2 + userZ;
-                const viewDist = CAMERA_FOCAL + finalZ;
-                
-                if (viewDist <= 20) {
-                    card.style.opacity = 0;
-                    card.style.transform = `translate3d(0px, 0px, 0) scale(0)`;
-                    return;
-                }
-
-                const projectionScale = CAMERA_FOCAL / viewDist;
-                const screenX = x1 * projectionScale;
-                const screenY = y2 * projectionScale;
-
-                const distToCenter = Math.hypot(screenX, screenY);
-                const centerFactor = Math.max(0, 1 - distToCenter / 250); 
-
-                let focusMagnify = 1.0;
-                if (finalZ < 200) {
-                    focusMagnify = 1.0 + (centerFactor * 0.7);
-                }
-
-                const baseScale = parseFloat(card.dataset.baseScale);
-                const finalScale = projectionScale * baseScale * focusMagnify;
-                
-                let opacity = projectionScale * (0.4 + centerFactor * 0.8);
-                if (opacity > 1) opacity = 1; 
-                if (viewDist < 100) opacity = (viewDist - 20) / 80; 
-
-                card.style.opacity = opacity;
-                card.style.zIndex = Math.floor(1000 - finalZ);
-                card.style.transform = `translate3d(calc(-50% + ${screenX}px), calc(-50% + ${screenY}px), 0) scale(${finalScale})`;
+                const x = card.dataset.x;
+                const y = card.dataset.y;
+                const z = card.dataset.z;
+                const scale = card.dataset.scale;
+                card.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateY(${rotY - 180}deg) rotateX(${-rotX}deg) scale(${scale})`;
             });
         }
 
-        function startRenderLoop() {
-            function loop() {
-                if (!isDragging) {
-                    rotY += autoRotSpeedY;
-                    rotY += vy;
-                    rotX += vx;
-                    rotX = Math.max(-40, Math.min(40, rotX));
-                }
-                updatePseudo3DProjection();
-                animationFrameId = requestAnimationFrame(loop);
-            }
-            if (animationFrameId) cancelAnimationFrame(animationFrameId);
-            loop();
+        function updateSpaceTransform() {
+            document.getElementById('stageContainer').style.perspective = `${fov}px`;
+            document.getElementById('space3d').style.transform = `translateZ(0px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
         }
 
         function init3DControl() {
             const container = document.getElementById('stageContainer');
             
             container.addEventListener('pointerdown', (e) => {
-                // 優化：如果其他頁面（Modal）打開了，直接阻斷，無法拖曳
-                if (document.querySelector('.modal.active')) return;
-                
-                if (e.pointerType === 'touch' && !e.isPrimary) return;
-
                 isDragging = true;
-                totalDragDistance = 0; 
+                dragMoved = false;
                 startX = e.clientX;
                 startY = e.clientY;
-                lastX = e.clientX;
-                lastY = e.clientY;
-                lastTime = performance.now();
-                
-                vx = 0;
-                vy = 0;
                 container.setPointerCapture(e.pointerId);
             });
 
             container.addEventListener('pointermove', (e) => {
                 if (!isDragging) return;
-                if (document.querySelector('.modal.active')) return; // 保險機制
-                if (e.pointerType === 'touch' && startTouchDist > 0) return;
-
                 const dx = e.clientX - startX;
                 const dy = e.clientY - startY;
-                
-                totalDragDistance += Math.hypot(dx, dy); 
-
+                if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+                    dragMoved = true;
+                }
                 rotY += dx * 0.25;
                 rotX -= dy * 0.25;
-                rotX = Math.max(-40, Math.min(40, rotX));
-
-                const now = performance.now();
-                const dt = now - lastTime;
-                if (dt > 0) {
-                    vy = ((e.clientX - lastX) / dt) * 1.5; 
-                    vx = -((e.clientY - lastY) / dt) * 1.5; 
-                }
-
+                rotX = Math.max(-45, Math.min(45, rotX)); 
                 startX = e.clientX;
                 startY = e.clientY;
-                lastX = e.clientX;
-                lastY = e.clientY;
-                lastTime = now;
+                updateSpaceTransform();
+                updateBillboards();
             });
 
             container.addEventListener('pointerup', (e) => {
                 isDragging = false;
                 container.releasePointerCapture(e.pointerId);
-                if (performance.now() - lastTime > 100) {
-                    vx = 0;
-                    vy = 0;
-                }
             });
 
-            // 滑鼠滾輪縮放（其他頁面開啟時禁用）
             window.addEventListener('wheel', (e) => {
                 if (document.querySelector('.modal.active')) return;
-                userZ -= e.deltaY * 0.4;
-                userZ = Math.max(MIN_USER_Z, Math.min(MAX_USER_Z, userZ));
+                fov += e.deltaY * 0.4;
+                fov = Math.max(250, Math.min(1400, fov)); 
+                updateSpaceTransform();
             }, { passive: true });
 
-            // 手機雙指縮放（其他頁面開啟時禁用）
             container.addEventListener('touchstart', (e) => {
-                if (document.querySelector('.modal.active')) return;
                 if (e.touches.length === 2) {
-                    isDragging = false; 
-                    startTouchDist = Math.hypot(
-                        e.touches[0].clientX - e.touches[1].clientX,
-                        e.touches[0].clientY - e.touches[1].clientY
+                    initialPinchDist = Math.hypot(
+                        e.touches[0].pageX - e.touches[1].pageX,
+                        e.touches[0].pageY - e.touches[1].pageY
                     );
-                    startPinchZ = userZ;
                 }
             }, { passive: true });
 
             container.addEventListener('touchmove', (e) => {
-                if (document.querySelector('.modal.active')) return;
-                if (e.touches.length === 2 && startTouchDist > 0) {
+                if (e.touches.length === 2 && initialPinchDist) {
                     const currentDist = Math.hypot(
-                        e.touches[0].clientX - e.touches[1].clientX,
-                        e.touches[0].clientY - e.touches[1].clientY
+                        e.touches[0].pageX - e.touches[1].pageX,
+                        e.touches[0].pageY - e.touches[1].pageY
                     );
-                    const deltaDist = currentDist - startTouchDist;
-                    userZ = startPinchZ + deltaDist * 1.2;
-                    userZ = Math.max(MIN_USER_Z, Math.min(MAX_USER_Z, userZ));
+                    const delta = currentDist - initialPinchDist;
+                    fov -= delta * 1.2;
+                    fov = Math.max(250, Math.min(1400, fov));
+                    initialPinchDist = currentDist;
+                    updateSpaceTransform();
                 }
             }, { passive: true });
 
             container.addEventListener('touchend', (e) => {
                 if (e.touches.length < 2) {
-                    startTouchDist = 0;
+                    initialPinchDist = null;
                 }
             });
         }
@@ -783,9 +670,6 @@
             const item = wordsArr[index];
             document.getElementById('focusWord').innerText = item.word;
             document.getElementById('focusTrans').innerText = '點擊顯示翻譯';
-            
-            // 開啟焦點單字卡時，背景也套用淡化效果
-            document.getElementById('stageContainer').classList.add('blur-out');
             document.getElementById('focusOverlay').classList.add('active');
         }
 
@@ -799,8 +683,6 @@
 
         function closeFocus() {
             document.getElementById('focusOverlay').classList.remove('active');
-            // 還原背景單字海的視覺亮度
-            document.getElementById('stageContainer').classList.remove('blur-out');
             renderCylinderSpace(); 
         }
 
@@ -837,8 +719,6 @@
         }
 
         function openModal(id) {
-            // 開啟頁面時，將 3D 單字海容器加上淡化/模糊效果且阻斷 pointer-events
-            document.getElementById('stageContainer').classList.add('blur-out');
             document.getElementById(id).classList.add('active');
             if (id === 'listsModal') renderListsManager();
             if (id === 'importModal') prepareImportTargetSelect();
@@ -846,8 +726,6 @@
 
         function closeModal(id) {
             document.getElementById(id).classList.remove('active');
-            // 關閉頁面時，恢復背景單字海亮度
-            document.getElementById('stageContainer').classList.remove('blur-out');
             renderCylinderSpace();
         }
 
@@ -917,29 +795,127 @@
             });
         }
 
-        function fetchTranslationsOnline() {
+        async function fetchTranslationsOnline() {
+            const btn = document.getElementById('startQueryBtn');
+            btn.innerText = '正在聯網自動一字多義查詞中...';
+            btn.disabled = true;
+
             const input = document.getElementById('importInput').value;
             const lines = input.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-            if(lines.length === 0) return;
+            if(lines.length === 0) {
+                btn.innerText = '開始自動查詢與解析';
+                btn.disabled = false;
+                return;
+            }
 
-            onlineImportList = lines.map((line, i) => {
-                const parts = line.split(/\s+/);
+            onlineImportList = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                const parts = lines[i].split(/\s+/);
                 const word = parts[0];
-                const trans = parts.slice(1).join(' ') || '暫無翻譯（點擊編輯）';
-                return { id: Date.now() + i, word: word, trans: [trans] };
-            });
+                let userTrans = parts.slice(1).join(' ');
 
+                let candidates = [];
+                if (userTrans) {
+                    candidates.push(userTrans);
+                } else {
+                    try {
+                        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (data && data[0] && data[0].meanings) {
+                                data[0].meanings.forEach(m => {
+                                    const pos = m.partOfSpeech;
+                                    if (m.definitions) {
+                                        m.definitions.slice(0, 3).forEach(d => {
+                                            candidates.push(`[${pos}] ${d.definition}`);
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    } catch (err) {
+                        console.error('API 查詢失敗', err);
+                    }
+                }
+
+                if (candidates.length === 0) {
+                    candidates.push('[暫無內建釋義，可在此手打加字]');
+                }
+
+                onlineImportList.push({
+                    id: Date.now() + i,
+                    word: word,
+                    allCandidates: candidates,
+                    defaultText: candidates[0] || ''
+                });
+            }
+
+            renderPreviewList();
+            document.getElementById('queryPreviewSection').style.display = 'block';
+            btn.innerText = '開始自動查詢與解析';
+            btn.disabled = false;
+        }
+
+        function renderPreviewList() {
             const previewBox = document.getElementById('previewBox');
             previewBox.innerHTML = '';
+            
             onlineImportList.forEach((item, index) => {
-                previewBox.innerHTML += `
-                    <div class="preview-item">
-                        <span>${item.word}</span>
-                        <input type="text" class="preview-edit-input" value="${item.trans[0]}" id="pre_in_${index}">
-                    </div>
-                `;
+                const card = document.createElement('div');
+                card.className = 'preview-card';
+                
+                // 標題與單字名
+                const header = document.createElement('div');
+                header.className = 'preview-header';
+                header.innerHTML = `<span class="preview-word-title">${item.word}</span>`;
+                
+                // 最終採用的文字輸入框 (可自己手動加字、修改)
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'preview-edit-input';
+                input.id = `pre_in_${index}`;
+                input.value = item.defaultText;
+                
+                // 列出所有查到的一字多義標籤
+                const tagsContainer = document.createElement('div');
+                tagsContainer.className = 'definition-tags-container';
+                
+                item.allCandidates.forEach(cand => {
+                    const badge = document.createElement('button');
+                    badge.type = 'button';
+                    badge.className = 'def-badge';
+                    badge.innerText = cand;
+                    // 點擊標籤：如果輸入框是預設空白或提示字，直接覆蓋；否則用逗號串接
+                    badge.onclick = () => {
+                        const curVal = input.value.trim();
+                        if (curVal === '' || curVal.startsWith('[暫無內建釋義') || curVal === item.allCandidates[0]) {
+                            input.value = cand;
+                        } else {
+                            input.value = curVal + ', ' + cand;
+                        }
+                    };
+                    tagsContainer.appendChild(badge);
+                });
+
+                // 一鍵全選按鈕 (若有很多意思想全打包)
+                if (item.allCandidates.length > 1) {
+                    const selectAllBtn = document.createElement('button');
+                    selectAllBtn.type = 'button';
+                    selectAllBtn.className = 'def-badge';
+                    selectAllBtn.style.border = '1px dashed var(--text-color)';
+                    selectAllBtn.innerText = '➕ 全選包含';
+                    selectAllBtn.onclick = () => {
+                        input.value = item.allCandidates.join(', ');
+                    };
+                    tagsContainer.appendChild(selectAllBtn);
+                }
+
+                card.appendChild(header);
+                card.appendChild(input);
+                card.appendChild(tagsContainer);
+                previewBox.appendChild(card);
             });
-            document.getElementById('queryPreviewSection').style.display = 'flex';
         }
 
         function saveImportedWordsOnline() {
@@ -948,10 +924,13 @@
 
             onlineImportList.forEach((item, index) => {
                 const editVal = document.getElementById(`pre_in_${index}`).value.trim();
-                item.trans = [editVal];
-                item.wrongCount = 0;
-                item.lastReviewed = Date.now();
-                appData.lists[targetId].words.push(item);
+                appData.lists[targetId].words.push({
+                    id: item.id,
+                    word: item.word,
+                    trans: [editVal || '暫無翻譯'],
+                    wrongCount: 0,
+                    lastReviewed: Date.now()
+                });
             });
 
             saveToStorage();
